@@ -7,8 +7,8 @@ public class Sadownikdb: IDisposable
     public SqliteConnection connection;
     private bool _disposed = false;
 
-    public List<Int64> BookIDBs = [];
-    public List<Int64> Chapters = [];
+    public List<Int64> BookIDBs = new List<Int64>();
+    public List<Int64> Chapters = new List<Int64>();
 
 
     public Sadownikdb(string dbPath)
@@ -28,7 +28,7 @@ public class Sadownikdb: IDisposable
         using var command = connection.CreateCommand();
         command.CommandText = """select distinct BOOK.IDB from BOOK""";
 
-        BookIDBs = [];
+        BookIDBs = new List<Int64>();
         using var reader = command.ExecuteReader();
         while (reader.Read())
         {
@@ -41,7 +41,7 @@ public class Sadownikdb: IDisposable
         using var command = connection.CreateCommand();
         command.CommandText = """select distinct CHAPTER from SENTENCE""";
 
-        Chapters = [];
+        Chapters = new List<Int64>();
         using var reader = command.ExecuteReader();
         while (reader.Read())
         {
