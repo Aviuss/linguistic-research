@@ -9,7 +9,7 @@ public class Program
     public static Persistance.Sadownikdb sadownikdb = null!;
 
 
-    void CheckIfNecessaryFieldsArentNullBeforeProgramRun()
+    void RequireNonNullProperties()
     {
         ArgumentNullException.ThrowIfNull(sadownikdb);
     }
@@ -20,13 +20,14 @@ public class Program
             dbPath: Path.Combine(dataAndResultsPath, "book database/SadownikDB.sqlite")
         );
 
-        CheckIfNecessaryFieldsArentNullBeforeProgramRun();
+        RequireNonNullProperties();
     }
 
     static void Main()
     {
         Console.WriteLine("Welcome to phylogenetic project, where research paper is being created in the Poznan University of Technology!");
         _ = new Program();
+        Console.WriteLine("Program finished running... .. .");
     }
 
 }
