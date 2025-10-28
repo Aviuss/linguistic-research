@@ -10,6 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="iluvadev.ConsoleProgressBar" Version="1.1.0" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.10" />
     <PackageReference Include="Quickenshtein" Version="1.5.1" />
   </ItemGroup>

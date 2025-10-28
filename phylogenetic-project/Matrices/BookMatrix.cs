@@ -1,4 +1,5 @@
 using System;
+using iluvadev.ConsoleProgressBar;
 using Microsoft.VisualBasic;
 using phylogenetic_project.Algorithms;
 using phylogenetic_project.Matrices.CellChapterJobs;
@@ -13,10 +14,13 @@ public class BookMatrix<T_FieldData>
 
     public List<int> bookIDBs = new List<int>();
     public List<int> chapters = new List<int>();
-
+   
     public IMatrixCellChapterJob<T_FieldData>? matrixCellChapterJob;
 
-    public BookMatrix(List<int> bookIDBs_, List<int> chapters_, IMatrixCellChapterJob<T_FieldData>? matrixCellChapterJob_)
+    public BookMatrix(
+        List<int> bookIDBs_,
+        List<int> chapters_,
+        IMatrixCellChapterJob<T_FieldData>? matrixCellChapterJob_)
     {
         bookIDBs = bookIDBs_;
         chapters = chapters_;
@@ -37,8 +41,10 @@ public class BookMatrix<T_FieldData>
         }
     }
 
-    public decimal[,]? GetResultMatrix()
+    public decimal[,]? GetResultMatrix(bool showProgressBar = true)
     {
+        using var progressBar = InitProgressBar(showProgressBar);
+
         if (matrixCellChapterJob == null) { return null; }
 
         result_matrix = new decimal[this.bookIDBs.Count, this.bookIDBs.Count];
@@ -51,10 +57,12 @@ public class BookMatrix<T_FieldData>
                 {
                     matrix[idx_idb1, idx_idb2][idx_chapter] = matrixCellChapterJob.Calculate(idx_idb1, idx_idb2, idx_chapter);
                     matrix[idx_idb2, idx_idb1][idx_chapter] = matrix[idx_idb1, idx_idb2][idx_chapter];
+                    
+                    progressBar?.PerformStep(1, $"matrixCellChapterJob.Calculate(idb_{idx_idb1}, idb_{idx_idb2}, chap_{idx_chapter})");
                 }
-
             }
         }
+
 
 
         for (int idx_idb1 = 0; idx_idb1 < bookIDBs.Count; idx_idb1++)
@@ -74,6 +82,23 @@ public class BookMatrix<T_FieldData>
 
 
         return result_matrix;
+    }
+
+    public ProgressBar? InitProgressBar(bool showProgressBar)
+    {
+        if (showProgressBar == false)
+        {
+            return null;
+        }
+
+        var max = bookIDBs.Count * (bookIDBs.Count -1) / 2 * chapters.Count;
+        var progressBar = new ProgressBar() { Maximum = max };
+        progressBar.Delay = 333;
+
+        progressBar.Text.Description.Clear();
+        progressBar.Text.Description.Processing.AddNew().SetValue(pb => $"Element: {pb.ElementName}");
+        
+        return progressBar;
     }
 
 }

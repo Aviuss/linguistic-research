@@ -17,11 +17,10 @@ public class Program
             dbPath: Path.Combine(dataAndResultsPath, "book database/SadownikDB.sqlite")
         );
 
-
         var levenshteinMatrix = new Matrices.BookMatrix<Matrices.CellChapterJobs.LevenshteinCellChapterJob_FieldData>(
-            new List<int>() { 27, 29, 44, 39 },
-            sadownikdb.Chapters,
-            new Matrices.CellChapterJobs.LevenshteinCellChapterJob(sadownikdb)
+            bookIDBs_: sadownikdb.BookIDBs,
+            chapters_: sadownikdb.Chapters,
+            matrixCellChapterJob_: new Matrices.CellChapterJobs.LevenshteinCellChapterJob(sadownikdb)
         );
 
         var x = levenshteinMatrix.GetResultMatrix();
