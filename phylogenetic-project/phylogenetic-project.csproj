@@ -6,8 +6,7 @@
     <RootNamespace>phylogenetic_project</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <WarningsAsErrors>Nullable</WarningsAsErrors>
-    <WarningsAsErrors>CA2000</WarningsAsErrors>
+    <WarningsAsErrors>Nullable,CA2000</WarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>
