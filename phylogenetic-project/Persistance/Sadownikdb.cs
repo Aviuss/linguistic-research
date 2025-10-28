@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using Microsoft.Data.Sqlite;
 namespace phylogenetic_project.Persistance;
 
-public class Sadownikdb: IDisposable
+public class Sadownikdb: IDisposable, IGetChapter
 {
     public SqliteConnection connection;
     private bool _disposed = false;
@@ -42,6 +42,17 @@ public class Sadownikdb: IDisposable
     public void ClearChapterLengthCache()
     {
         chapterLengthCache.Clear();
+    }
+
+    public int GetChaptersLength(int bookIDB, int chapterNo)
+    {
+        int length;
+        if (TryGetChapterLengthCache(bookIDB, chapterNo, out length) == false)
+        {
+            length = GetChapter(bookIDB, chapterNo).Length;
+        }
+
+        return length;
     }
 
     public string GetChapter(int bookIDB, int chapterNo)

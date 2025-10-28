@@ -18,6 +18,14 @@ public class Program
         );
 
 
+        var levenshteinMatrix = new Matrices.BookMatrix<Matrices.CellChapterJobs.LevenshteinCellChapterJob_FieldData>(
+            new List<int>() { 27, 29, 44, 39 },
+            sadownikdb.Chapters,
+            new Matrices.CellChapterJobs.LevenshteinCellChapterJob(sadownikdb)
+        );
+
+        var x = levenshteinMatrix.GetResultMatrix();
+        Console.WriteLine(x);
 
         sadownikdb.Dispose();
         Console.WriteLine("Program finished running... .. .");
