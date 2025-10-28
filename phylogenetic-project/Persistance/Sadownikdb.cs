@@ -5,6 +5,9 @@ namespace phylogenetic_project.Persistance;
 
 public class Sadownikdb: IDisposable, IGetChapter
 {
+    public string chapterGetterId => "Sadownikdb";
+
+
     public SqliteConnection connection;
     private bool _disposed = false;
 
@@ -52,7 +55,7 @@ public class Sadownikdb: IDisposable, IGetChapter
     public void InitBookIds()
     {
         using var command = connection.CreateCommand();
-        command.CommandText = """select distinct BOOK.IDB from BOOK""";
+        command.CommandText = """select distinct BOOK.IDB from BOOK order by BOOK.IDB""";
 
         BookIDBs = new List<int>();
         using var reader = command.ExecuteReader();
@@ -65,7 +68,7 @@ public class Sadownikdb: IDisposable, IGetChapter
     public void InitChapters()
     {
         using var command = connection.CreateCommand();
-        command.CommandText = """select distinct CHAPTER from SENTENCE""";
+        command.CommandText = """select distinct CHAPTER from SENTENCE order by CHAPTER""";
 
         Chapters = new List<int>();
         using var reader = command.ExecuteReader();

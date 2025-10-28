@@ -21,15 +21,16 @@ public class Program
 
         var jobFactory = new JobPresents.JobFactory();
 
-        IJobPreset x =  jobFactory.Create("StandardLevenshteinAlgorithm");
-        x.bookIDBs = new List<int>() { 27, 44, 32, 28 };
-        x.chapters = sadownikdb.Chapters;
-        x.getChapterConstruct = sadownikdb;
-        x.Start();
+        IJobPreset job =  jobFactory.Create("StandardLevenshteinAlgorithm");
+        job.bookIDBs = new List<int>() { 27, 44, 32, 28 };
+        job.chapters = sadownikdb.Chapters;
+        job.getChapterConstruct = sadownikdb;
+        job.Start();
 
+        
 
         sadownikdb.Dispose();
         Console.WriteLine("Program finished running... .. .");
-    }
+    } 
 
 }

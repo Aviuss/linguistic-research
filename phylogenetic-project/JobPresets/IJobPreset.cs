@@ -14,4 +14,5 @@ public interface IJobPreset
     public List<int> bookIDBs { get; set; }
     public List<int> chapters { get; set; }
     IGetChapter getChapterConstruct { get; set; }
+
 }
