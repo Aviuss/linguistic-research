@@ -1,4 +1,5 @@
-﻿using System;
+﻿using phylogenetic_project.JobPresents;
+using System;
 using System.IO;
 namespace phylogenetic_project;
 
@@ -17,14 +18,15 @@ public class Program
             dbPath: Path.Combine(dataAndResultsPath, "book database/SadownikDB.sqlite")
         );
 
-        var levenshteinMatrix = new Matrices.BookMatrix<Matrices.CellChapterJobs.LevenshteinCellChapterJob_FieldData>(
-            bookIDBs_: new List<int>() { 27, 44, 32, 28},
-            chapters_: sadownikdb.Chapters,
-            matrixCellChapterJob_: new Matrices.CellChapterJobs.LevenshteinCellChapterJob(sadownikdb)
-        );
 
-        var x = levenshteinMatrix.GetResultMatrix();
-        Console.WriteLine(levenshteinMatrix.ToString());
+        var jobFactory = new JobPresents.JobFactory();
+
+        IJobPreset x =  jobFactory.Create("StandardLevenshteinAlgorithm");
+        x.bookIDBs = new List<int>() { 27, 44, 32, 28 };
+        x.chapters = sadownikdb.Chapters;
+        x.getChapterConstruct = sadownikdb;
+        x.Start();
+
 
         sadownikdb.Dispose();
         Console.WriteLine("Program finished running... .. .");

@@ -41,7 +41,7 @@ public class BookMatrix<T_FieldData>
         }
     }
 
-    public decimal[,]? GetResultMatrix(bool showProgressBar = true)
+    public decimal[,]? CalculateResultMatrix(bool showProgressBar = true)
     {
         using var progressBar = InitProgressBar(showProgressBar);
 
@@ -119,7 +119,7 @@ public class BookMatrix<T_FieldData>
         if (result_matrix ==  null) { return "Warning: No matrix to show!"; }
 
         string[] lines = new string[bookIDBs.Count + 1];
-        List<string> bookIdentification = bookIDBs.Select(x => (x*x*x*x).ToString()).ToList();
+        List<string> bookIdentification = bookIDBs.Select(x => (x).ToString()).ToList();
         int maxLengthForNumber = PRECISION == 0 ? 1 : PRECISION + 2;
         int maxLengthPerField = Math.Max(bookIdentification.Max(x => x.Length), maxLengthForNumber);
         
