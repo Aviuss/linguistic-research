@@ -11,10 +11,6 @@ public class Sadownikdb: IDisposable, IGetChapter
     public List<int> BookIDBs = new List<int>();
     public List<int> Chapters = new List<int>();
 
-    private readonly ConcurrentDictionary<CacheKey, int> chapterLengthCache = new ConcurrentDictionary<CacheKey, int>();
-
-
-
     public Sadownikdb(string dbPath)
     {
         if (!File.Exists(dbPath))
@@ -25,34 +21,6 @@ public class Sadownikdb: IDisposable, IGetChapter
 
         InitBookIds();
         InitChapters();
-    }
-
-    public void SetChapterLengthCache(int key1, int key2, int value)
-    {
-        var cacheKey = new CacheKey(key1, key2);
-        chapterLengthCache[cacheKey] = value;
-    }
-
-    public bool TryGetChapterLengthCache(int key1, int key2, out int value)
-    {
-        var cacheKey = new CacheKey(key1, key2);
-        return chapterLengthCache.TryGetValue(cacheKey, out value);
-    }
-
-    public void ClearChapterLengthCache()
-    {
-        chapterLengthCache.Clear();
-    }
-
-    public int GetChaptersLength(int bookIDB, int chapterNo)
-    {
-        int length;
-        if (TryGetChapterLengthCache(bookIDB, chapterNo, out length) == false)
-        {
-            length = GetChapter(bookIDB, chapterNo).Length;
-        }
-
-        return length;
     }
 
     public string GetChapter(int bookIDB, int chapterNo)
@@ -78,7 +46,6 @@ public class Sadownikdb: IDisposable, IGetChapter
         }
 
         string text = string.Join(" ", lines);
-        SetChapterLengthCache(bookIDB, chapterNo, text.Length);
         return text;
     }
 

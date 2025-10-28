@@ -10,5 +10,4 @@ public interface IGetChapter
 {
     public string GetChapter(int bookIDB, int chapterNo);
 
-    public int GetChaptersLength(int bookIDB, int chapterNO);
 }
