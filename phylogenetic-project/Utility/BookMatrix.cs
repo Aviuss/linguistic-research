@@ -8,10 +8,10 @@ public class BookMatrix<T_FieldData>
 {
     private T_FieldData[,] matrix;
 
-    public List<Int64> BookIDBs = new List<Int64>();
-    public List<Int64> Chapters = new List<Int64>();
+    public List<int> BookIDBs = new List<int>();
+    public List<int> Chapters = new List<int>();
 
-    public BookMatrix(List<Int64> bookIDBs, List<Int64> chapters)
+    public BookMatrix(List<int> bookIDBs, List<int> chapters)
     {
         BookIDBs = bookIDBs;
         Chapters = chapters;
@@ -28,30 +28,30 @@ public class BookMatrix<T_FieldData>
         return matrix[bookIndex, chapterIndex];
     }
 
-    public void SetValue(Int64 idb, Int64 chapterId, T_FieldData value)
+    public void SetValue(int idb, int chapterNo, T_FieldData value)
     {
         var i = BookIDBs.FindIndex(element => element == idb);
-        var j = Chapters.FindIndex(element => element == chapterId);
+        var j = Chapters.FindIndex(element => element == chapterNo);
 
         if (i == -1)
             throw new ArgumentException($"BookID {idb} not found");
 
         if (j == -1)
-            throw new ArgumentException($"ChapterID {chapterId} not found");
+            throw new ArgumentException($"ChapterID {chapterNo} not found");
 
         matrix[i, j] = value;
     }
 
-    public T_FieldData GetValue(Int64 idb, Int64 chapterId, T_FieldData value)
+    public T_FieldData GetValue(int idb, int chapterNo, T_FieldData value)
     {
         var i = BookIDBs.FindIndex(element => element == idb);
-        var j = Chapters.FindIndex(element => element == chapterId);
+        var j = Chapters.FindIndex(element => element == chapterNo);
 
         if (i == -1)
             throw new ArgumentException($"BookID {idb} not found");
 
         if (j == -1)
-            throw new ArgumentException($"ChapterID {chapterId} not found");
+            throw new ArgumentException($"ChapterID {chapterNo} not found");
 
         return matrix[i, j];
     }
