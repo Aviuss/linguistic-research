@@ -32,18 +32,37 @@ public class StandardLevenshtein : IJobPreset
         _ = levenshteinMatrix.CalculateResultMatrix();
         Console.WriteLine(levenshteinMatrix.ToString());
 
-
-        string folderPath = Path.Combine(Program.dataAndResultsPath ?? "", $"results\\temporary\\{timeNow}");
-        Directory.CreateDirectory(folderPath);
-        File.WriteAllText(Path.Combine(folderPath, "matrix.txt"), levenshteinMatrix.ToString(-1));
-        File.WriteAllText(Path.Combine(folderPath, "config.txt"), $"""
+        StaticMethods.SaveTemporaryResults.Save(timeNow, new (string, string)[]
+        {
+            ("matrix.txt", levenshteinMatrix.ToString(-1)),
+            ("config.txt", $"""
             Algorithm used: {jobId}
             
              - chapter text from: {getChapterConstruct.chapterGetterId}
              - bookIDBs: {string.Join(", ", bookIDBs.Select(idb => idb.ToString()))}
              - chapters: {string.Join(", ", chapters.Select(chap => chap.ToString()))}
-            """);
+            """)
+        });
 
-        Console.WriteLine($"All results saved in: \"{folderPath}\" \n");
+        Console.WriteLine(levenshteinMatrix.ConvertToPythonList());
+
+        StaticMethods.Python.CallPythonScript(
+            "create_nj_newick.py",
+            new string[] { @"{""save_path"": """", ""inputmatrix"": []}" }
+        );
+        //StaticMethods.Python.CallPythonScript("create_linguistic_trees.py", new string[] { @"{""testProperty"": ""mleko""}" });
+    }
+}
+
+internal record struct NewStruct(string Item1, string Item2)
+{
+    public static implicit operator (string, string)(NewStruct value)
+    {
+        return (value.Item1, value.Item2);
+    }
+
+    public static implicit operator NewStruct((string, string) value)
+    {
+        return new NewStruct(value.Item1, value.Item2);
     }
 }

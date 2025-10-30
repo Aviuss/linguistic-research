@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using iluvadev.ConsoleProgressBar;
 using Microsoft.VisualBasic;
 using phylogenetic_project.Algorithms;
@@ -197,7 +198,36 @@ public class BookMatrix<T_FieldData>
         }
 
 
-        return string.Join("\n", lines);
+        return string.Join("\n", lines) + '\n';
+    }
+
+    public string ConvertToPythonList()
+    {
+        if (result_matrix == null) { return "Warning: No matrix to show!"; }
+
+        string pythonListString = "[";
+
+        for (int i = 0; i < bookIDBs.Count; i++)
+        {
+            pythonListString += "[";
+
+            for (int j = 0; j < bookIDBs.Count; j++)
+            {
+                pythonListString += result_matrix[i, j].ToString(CultureInfo.InvariantCulture);
+                if (j != bookIDBs.Count - 1)
+                {
+                    pythonListString += ",";
+                }
+            }
+            pythonListString += "]";
+            if (i != bookIDBs.Count - 1)
+            {
+                pythonListString += ",";
+            }
+        }
+
+        pythonListString += "]";
+        return pythonListString;
     }
 
 }

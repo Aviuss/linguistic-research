@@ -1,12 +1,15 @@
 ﻿using phylogenetic_project.JobPresents;
+using phylogenetic_project.StaticMethods;
 using System;
+using System.Diagnostics;
 using System.IO;
 namespace phylogenetic_project;
 
 public class Program
 {
-    public static readonly string dataAndResultsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\data and results");
-
+    public static readonly string projectPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..");
+    public static readonly string dataAndResultsPath = Path.Combine(projectPath, @"data and results");
+    
     public static Persistance.Sadownikdb? sadownikdb;
 
 
@@ -23,7 +26,7 @@ public class Program
 
         IJobPreset job =  jobFactory.Create("StandardLevenshteinAlgorithm");
         job.bookIDBs = new List<int>() { 27, 44, 32, 28 };
-        job.chapters = sadownikdb.Chapters;
+        job.chapters = new List<int>() { 1, 2, 4, 8, 16} ;
         job.getChapterConstruct = sadownikdb;
         job.Start();
 
