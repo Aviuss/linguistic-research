@@ -45,7 +45,7 @@ public class Sadownikdb: IDisposable, IGetChapter
         using var reader = command.ExecuteReader();
         while (reader.Read())
         {
-            lines.Add(reader.GetString(0));
+            lines.Add(reader.GetString(0).Trim());
         }
 
         string text = string.Join(" ", lines);
