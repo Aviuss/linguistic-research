@@ -14,6 +14,7 @@ public class Program
     public static Persistance.Sadownikdb? sadownikdb;
 
     public static ConcurrentDictionary<int, string>? mapIdbToName = null;
+    public static List<Persistance.LanguageRules>? listOfLanguageRules = null;
 
     static void Main()
     {
@@ -23,15 +24,15 @@ public class Program
             dbPath: Path.Combine(dataAndResultsPath, "book database/SadownikDB.sqlite")
         );
         mapIdbToName = Persistance.MapIdbToName.ReadFromFile();
+        listOfLanguageRules = Persistance.GetLanguageRules.ReadFromFile();
+
 
         var jobFactory = new JobPresents.JobFactory();
-
         IJobPreset job = jobFactory.Create("StandardLevenshteinAlgorithm");
-        job.bookIDBs = new List<int>() { 27, 44, 32, 28 };
-        job.chapters = new List<int>() { 1, 2, 4, 8, 16 };
+        job.bookIDBs = new List<int>() { 27, 29, 36, 38, 46, 37, 44, 39, 43, 33, 42 };
+        job.chapters = new() { 1 };
         job.getChapterConstruct = sadownikdb;
         job.Start();
-
 
 
         sadownikdb.Dispose();
