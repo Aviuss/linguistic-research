@@ -1,6 +1,7 @@
 ﻿using phylogenetic_project.JobPresents;
 using phylogenetic_project.StaticMethods;
 using System;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO;
 namespace phylogenetic_project;
@@ -12,6 +13,7 @@ public class Program
     
     public static Persistance.Sadownikdb? sadownikdb;
 
+    public static ConcurrentDictionary<int, string>? mapIdbToName = null;
 
     static void Main()
     {
@@ -20,17 +22,17 @@ public class Program
         sadownikdb = new Persistance.Sadownikdb(
             dbPath: Path.Combine(dataAndResultsPath, "book database/SadownikDB.sqlite")
         );
-
+        mapIdbToName = Persistance.MapIdbToName.ReadFromFile();
 
         var jobFactory = new JobPresents.JobFactory();
 
-        IJobPreset job =  jobFactory.Create("StandardLevenshteinAlgorithm");
+        IJobPreset job = jobFactory.Create("StandardLevenshteinAlgorithm");
         job.bookIDBs = new List<int>() { 27, 44, 32, 28 };
-        job.chapters = new List<int>() { 1, 2, 4, 8, 16} ;
+        job.chapters = new List<int>() { 1, 2, 4, 8, 16 };
         job.getChapterConstruct = sadownikdb;
         job.Start();
 
-        
+
 
         sadownikdb.Dispose();
         Console.WriteLine("Program finished running... .. .");

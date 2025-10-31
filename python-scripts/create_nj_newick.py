@@ -20,7 +20,7 @@ def main():
             pass
         tree.ladderize()
         newick = tree.format('newick')
-        f = open(arguments["save_path_newick"], "w+")
+        f = open(arguments["save_path_newick"], "w+", encoding="utf-8")
         f.write(newick)
         f.close()
         print("Newick saved.")

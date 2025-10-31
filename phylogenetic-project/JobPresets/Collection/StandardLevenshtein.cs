@@ -51,7 +51,18 @@ public class StandardLevenshtein : IJobPreset
         {
             save_path_newick = Path.Combine(StaticMethods.SaveTemporaryResults.TemporaryFolderPath(timeNow), "newick.txt"),
             inputmatrix = levenshteinMatrix.ConvertResultToLowerTriangularMatrix(),
-            names = bookIDBs.Select(element => "idb_" + element.ToString()).ToList()
+            names = bookIDBs.Select(element =>
+            {
+                if (Program.mapIdbToName != null && Program.mapIdbToName.TryGetValue(element, out string? value))
+                {
+                    if (value != null)
+                    {
+                        return value;
+                    }
+                }
+
+                return "idb_" + element.ToString();
+            }).ToList()
         };
         StaticMethods.Python.CallPythonScript(
             "create_nj_newick.py",
