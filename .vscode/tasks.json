@@ -1,0 +1,11 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+    {
+        "label": "dotnet build",
+        "type": "shell",
+        "command": "dotnet build ${workspaceFolder}/phylogenetic-project/phylogenetic-project.csproj",
+        "problemMatcher": "$msCompile"
+    }
+]
+}
