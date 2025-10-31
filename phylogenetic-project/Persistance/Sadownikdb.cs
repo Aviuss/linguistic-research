@@ -63,6 +63,7 @@ public class Sadownikdb: IDisposable, IGetChapter
         {
             BookIDBs.Add(reader.GetInt32(0));
         }
+        BookIDBs.Sort();
     }
 
     public void InitChapters()
@@ -76,6 +77,7 @@ public class Sadownikdb: IDisposable, IGetChapter
         {
             Chapters.Add(reader.GetInt32(0));
         }
+        Chapters.Sort();
     }
 
     public void Dispose()
