@@ -8,9 +8,7 @@ def main():
     if len(sys.argv) != 2:
         print("Error: Unsupported number of arguments")
         return
-    print(sys.argv[1])
     arguments = json.loads(sys.argv[1])
-    print(arguments)
     
     if "save_path_newick" in arguments and "inputmatrix" in arguments and "names" in arguments:
         constructor = DistanceTreeConstructor()
@@ -22,14 +20,12 @@ def main():
             pass
         tree.ladderize()
         newick = tree.format('newick')
-        print(newick)
         f = open(arguments["save_path_newick"], "w+")
         f.write(newick)
         f.close()
+        print("Newick saved.")
     else:
         print("Error: missing arguments")
-
-    constructor = DistanceTreeConstructor()
     
 
 if __name__ == "__main__":

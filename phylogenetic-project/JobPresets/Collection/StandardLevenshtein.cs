@@ -30,9 +30,10 @@ public class StandardLevenshtein : IJobPreset
              matrixCellChapterJob_: new Matrices.CellChapterJobs.LevenshteinCellChapterJob(getChapterConstruct)
          );
 
-
         _ = levenshteinMatrix.CalculateResultMatrix();
         Console.WriteLine(levenshteinMatrix.ToString());
+
+
 
         StaticMethods.SaveTemporaryResults.Save(timeNow, new (string, string)[]
         {
@@ -45,23 +46,27 @@ public class StandardLevenshtein : IJobPreset
              - chapters: {string.Join(", ", chapters.Select(chap => chap.ToString()))}
             """)
         });
-
         
-
-        var data = new
+        var pyDataNewick = new
         {
             save_path_newick = Path.Combine(StaticMethods.SaveTemporaryResults.TemporaryFolderPath(timeNow), "newick.txt"),
             inputmatrix = levenshteinMatrix.ConvertResultToLowerTriangularMatrix(),
             names = bookIDBs.Select(element => "idb_" + element.ToString()).ToList()
         };
-
-        string json = JsonSerializer.Serialize(data, new JsonSerializerOptions { WriteIndented = true });
-
         StaticMethods.Python.CallPythonScript(
             "create_nj_newick.py",
-            new string[] { json }
+            new string[] { JsonSerializer.Serialize(pyDataNewick, new JsonSerializerOptions { WriteIndented = true }) }
         );
-        //StaticMethods.Python.CallPythonScript("create_linguistic_trees.py", new string[] { @"{""testProperty"": ""mleko""}" });
+        
+        var pyDataGraph = new
+        {
+            save_path_graph = Path.Combine(StaticMethods.SaveTemporaryResults.TemporaryFolderPath(timeNow), "graph.png"),
+            newickFormat = File.ReadAllText(Path.Combine(StaticMethods.SaveTemporaryResults.TemporaryFolderPath(timeNow), "newick.txt"))
+        };
+        StaticMethods.Python.CallPythonScript(
+            "create_linguistic_trees.py",    
+            new string[] { JsonSerializer.Serialize(pyDataGraph, new JsonSerializerOptions { WriteIndented = true }) }
+        );
     }
 }
 

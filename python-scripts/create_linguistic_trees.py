@@ -10,8 +10,9 @@ def main():
         return
     arguments = json.loads(sys.argv[1])
     
-    if "save_path" in arguments and "newickFormat" in arguments:
-        treeGeneration(newickFormat, save_path)
+    if "save_path_graph" in arguments and "newickFormat" in arguments:
+        treeGeneration(arguments["newickFormat"], arguments["save_path_graph"])
+        print("Graph created.")
     else:
         print("Error: missing arguments")
 
