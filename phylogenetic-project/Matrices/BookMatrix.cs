@@ -109,7 +109,7 @@ public class BookMatrix<T_FieldData>
     {
         return ToString(2);
     }
-    
+
     /// <summary>
     /// Converts to string
     /// </summary>
@@ -117,13 +117,13 @@ public class BookMatrix<T_FieldData>
     /// <returns>Matrix of results in string format</returns>
     public string ToString(int PRECISION)
     {
-        if (result_matrix ==  null) { return "Warning: No matrix to show!"; }
+        if (result_matrix == null) { return "Warning: No matrix to show!"; }
 
         string[] lines = new string[bookIDBs.Count + 1];
         List<string> bookIdentification = bookIDBs.Select(x => (x).ToString()).ToList();
         int maxLengthForNumber = PRECISION == 0 ? 1 : PRECISION + 2;
         int maxLengthPerField = Math.Max(bookIdentification.Max(x => x.Length), maxLengthForNumber);
-        
+
         if (PRECISION == -1)
         {
             maxLengthForNumber = 0;
@@ -161,16 +161,17 @@ public class BookMatrix<T_FieldData>
             }
             lines[idx_line] += $"{bookName} ";
 
-            
+
             for (int idx_number = 0; idx_number < bookIDBs.Count; idx_number++)
             {
                 string number;
                 if (PRECISION == -1)
                 {
-                    number = result_matrix[idx_line-1, idx_number].ToString();
-                } else
+                    number = result_matrix[idx_line - 1, idx_number].ToString();
+                }
+                else
                 {
-                    number = Math.Round(result_matrix[idx_line-1, idx_number], PRECISION).ToString();
+                    number = Math.Round(result_matrix[idx_line - 1, idx_number], PRECISION).ToString();
                 }
 
                 if (number.Length == 1 && number.Length != maxLengthForNumber)
@@ -201,33 +202,23 @@ public class BookMatrix<T_FieldData>
         return string.Join("\n", lines) + '\n';
     }
 
-    public string ConvertToPythonList()
+    public decimal[][] ConvertResultToLowerTriangularMatrix()
     {
-        if (result_matrix == null) { return "Warning: No matrix to show!"; }
+        if (result_matrix == null) { return []; }
 
-        string pythonListString = "[";
+        int n = bookIDBs.Count;
+        decimal[][] newMatrix = new decimal[n][];
 
-        for (int i = 0; i < bookIDBs.Count; i++)
+        for (int i = 0; i < n; i++)
         {
-            pythonListString += "[";
-
-            for (int j = 0; j < bookIDBs.Count; j++)
+            newMatrix[i] = new decimal[i + 1];
+            for (int j = 0; j <= i; j++)
             {
-                pythonListString += result_matrix[i, j].ToString(CultureInfo.InvariantCulture);
-                if (j != bookIDBs.Count - 1)
-                {
-                    pythonListString += ",";
-                }
-            }
-            pythonListString += "]";
-            if (i != bookIDBs.Count - 1)
-            {
-                pythonListString += ",";
+                newMatrix[i][j] = result_matrix[i, j];
             }
         }
 
-        pythonListString += "]";
-        return pythonListString;
+        return newMatrix;
     }
-
+    
 }

@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Text.Json;
+
 
 namespace phylogenetic_project.JobPresets.Collection;
 
@@ -44,11 +46,20 @@ public class StandardLevenshtein : IJobPreset
             """)
         });
 
-        Console.WriteLine(levenshteinMatrix.ConvertToPythonList());
+        
+
+        var data = new
+        {
+            save_path_newick = Path.Combine(StaticMethods.SaveTemporaryResults.TemporaryFolderPath(timeNow), "newick.txt"),
+            inputmatrix = levenshteinMatrix.ConvertResultToLowerTriangularMatrix(),
+            names = bookIDBs.Select(element => "idb_" + element.ToString()).ToList()
+        };
+
+        string json = JsonSerializer.Serialize(data, new JsonSerializerOptions { WriteIndented = true });
 
         StaticMethods.Python.CallPythonScript(
             "create_nj_newick.py",
-            new string[] { @"{""save_path"": """", ""inputmatrix"": []}" }
+            new string[] { json }
         );
         //StaticMethods.Python.CallPythonScript("create_linguistic_trees.py", new string[] { @"{""testProperty"": ""mleko""}" });
     }
@@ -65,4 +76,4 @@ internal record struct NewStruct(string Item1, string Item2)
     {
         return new NewStruct(value.Item1, value.Item2);
     }
-}
+}   

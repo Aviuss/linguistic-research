@@ -16,12 +16,12 @@ public class Python
         ProcessStartInfo start = new ProcessStartInfo();
         start.FileName = "python";
         start.ArgumentList.Add(Path.Combine(pythonScriptsPath, scriptName));
-        
+
         for (int i = 0; arguments != null && i < arguments.Length; i++)
         {
             start.ArgumentList.Add(arguments[i]);
         }
-        
+
         start.UseShellExecute = false;
         start.RedirectStandardOutput = true;
 
@@ -36,4 +36,5 @@ public class Python
         }
 
     }
+    
 }
