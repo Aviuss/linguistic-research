@@ -24,7 +24,7 @@ public class StandardLevenshtein : IJobPreset
     {
         ArgumentNullException.ThrowIfNull(getChapterConstruct);
 
-        var levenshteinMatrix = new Matrices.BookMatrix<Matrices.CellChapterJobs.LevenshteinCellChapterJob_FieldData>(
+        var levenshteinMatrix = new Matrices.BookMatrix<Matrices.CellChapterJobs.LevenshteinIndividualDataInt>(
              bookIDBs_: bookIDBs,
              chapters_: chapters,
              matrixCellChapterJob_: new Matrices.CellChapterJobs.LevenshteinCellChapterJob(getChapterConstruct)

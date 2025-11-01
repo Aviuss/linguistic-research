@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace phylogenetic_project.Matrices.CellChapterJobs;
 
-public class LevenshteinCellChapterJob: IMatrixCellChapterJob<LevenshteinCellChapterJob_FieldData>
+public class LevenshteinCellChapterJob: IMatrixCellChapterJob<LevenshteinIndividualDataInt>
 {
     public List<int> bookIDBs { get; set; }  = new List<int>();
     public List<int> chapters { get; set; } = new List<int>();
@@ -19,7 +19,7 @@ public class LevenshteinCellChapterJob: IMatrixCellChapterJob<LevenshteinCellCha
         GetChapterConstruct = getChapterConstruct;
     }
 
-    public LevenshteinCellChapterJob_FieldData Calculate(int idx_idb1, int idx_idb2, int idx_chapter)
+    public LevenshteinIndividualDataInt Calculate(int idx_idb1, int idx_idb2, int idx_chapter)
     {
         int idb1 = bookIDBs[idx_idb1];
         int idb2 = bookIDBs[idx_idb2];
@@ -27,13 +27,13 @@ public class LevenshteinCellChapterJob: IMatrixCellChapterJob<LevenshteinCellCha
         string text_idb1 = GetChapterConstruct.GetChapter(idb1, chapterNo);
         string text_idb2 = GetChapterConstruct.GetChapter(idb2, chapterNo);
 
-        return new LevenshteinCellChapterJob_FieldData(
+        return new LevenshteinIndividualDataInt(
             Algorithms.Levenshtein.Distance(text_idb1, text_idb2),
             Math.Max(text_idb1.Length, text_idb2.Length)
         );
     }
 
-    public decimal MergeChapters(LevenshteinCellChapterJob_FieldData[] chaptersList)
+    public decimal MergeChapters(LevenshteinIndividualDataInt[] chaptersList)
     {
         if (chaptersList.Length != chapters.Count)
         {
@@ -54,20 +54,3 @@ public class LevenshteinCellChapterJob: IMatrixCellChapterJob<LevenshteinCellCha
 
 }
 
-public struct LevenshteinCellChapterJob_FieldData
-{
-    public int levensthein_distance;
-    public int max_chapter_length;
-
-    public LevenshteinCellChapterJob_FieldData(int distance, int MaxLength)
-    {
-        levensthein_distance = distance;
-        max_chapter_length = MaxLength;
-    }
-
-    public LevenshteinCellChapterJob_FieldData()
-    {
-        levensthein_distance = 0;
-        max_chapter_length = 1;
-    }
-}

@@ -46,16 +46,17 @@ public class IPA
                 index += 1;
             }
 
-            
+
 
             if (addChar.Length == 1 && choices.Count > 0 && choices[choices.Count - 1].Length == 1)
             {
                 choices[choices.Count - 1][0].Append(addChar[0]);
-            } else
-            {
-                choices.Add(addChar.Select(s => new StringBuilder(s)).ToArray());                
             }
-    
+            else
+            {
+                choices.Add(addChar.Select(s => new StringBuilder(s)).ToArray());
+            }
+
 
         }
 
@@ -63,5 +64,25 @@ public class IPA
         {
             return element.Select(el => el.ToString()).ToArray();
         }).ToList();
+    }
+    
+    public static (List<string?>, List<string[]>) ExtractChoiceVector(List<string[]> ipaText)
+    {
+        List<string?> textBlankChoice = [];
+        List<string[]> choices = [];
+
+        for (int i = 0; i < ipaText.Count; i++)
+        {
+            if (ipaText[i].Length == 1)
+            {
+                textBlankChoice.Add(ipaText[i][0]);
+            } else
+            {
+                textBlankChoice.Add(null);
+                choices.Add(ipaText[i]);
+            }
+        }
+
+        return (textBlankChoice, choices);
     }
 }
