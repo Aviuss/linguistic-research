@@ -4,7 +4,7 @@ using phylogenetic_project.Matrices.CellChapterJobs;
 
 namespace phylogenetic_project.Algorithms;
 
-public class LevenshteinIPARandomChoice
+public class LevenshteinIPARandomChoiceAveraged
 {
     public static LevenshteinIndividualDataDecimal Calculate
         (List<string[]> inputText1, List<string[]> inputText2, long randomSize = 10000)

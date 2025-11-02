@@ -114,6 +114,9 @@ public class BookMatrix<T_FieldData>
     public void CalculateResultMatrixInParallel(string jobId, bool showProgressBar = true)
     {
         if (matrixCellChapterJob == null) { return; }
+        if (cacheDBIDWrapper == null) {
+            throw new ArgumentException("Error: Cache not provided");
+        }
 
         using var progressBar = InitProgressBar(showProgressBar);
 

@@ -45,7 +45,7 @@ public class IPARandomChoiceLevenshteinCellChapterJob: IMatrixCellChapterJob<Lev
         );
 
         
-        return Algorithms.LevenshteinIPARandomChoice.Calculate(ipaText_idb1, ipaText_idb2, randomSize);
+        return Algorithms.LevenshteinIPARandomChoiceAveraged.Calculate(ipaText_idb1, ipaText_idb2, randomSize);
     }
 
     public decimal MergeChapters(LevenshteinIndividualDataDecimal[] chaptersList)
