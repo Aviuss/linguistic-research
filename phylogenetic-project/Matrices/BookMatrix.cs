@@ -147,33 +147,48 @@ public class BookMatrix<T_FieldData>
         return Task.Run(() =>
         {
             bool[,] doneMatrix = new bool[this.bookIDBs.Count, this.bookIDBs.Count];
-
-            for (int idx_idb1 = 0; idx_idb1 < bookIDBs.Count; idx_idb1++)
+            int previousDone = 0;
+            while (true)
             {
-                for (int idx_idb2 = idx_idb1 + 1; idx_idb2 < bookIDBs.Count; idx_idb2++)
+                int nowDone = 0;
+                bool everythingDone = true;
+                for (int idx_idb1 = 0; idx_idb1 < bookIDBs.Count; idx_idb1++)
                 {
-                    for (int idx_chapter = 0; idx_chapter < chapters.Count; idx_chapter++)
+                    for (int idx_idb2 = idx_idb1 + 1; idx_idb2 < bookIDBs.Count; idx_idb2++)
                     {
-                        if (cacheDBIDWrapper != null && cacheDBIDWrapper.cacheDB != null)
+                        for (int idx_chapter = 0; idx_chapter < chapters.Count; idx_chapter++)
                         {
-                            string? result = cacheDBIDWrapper.cacheDB.TryToGetFromCache(cacheDBIDWrapper.algorithmName, cacheDBIDWrapper.algorithmArgs, bookIDBs[idx_idb1], bookIDBs[idx_idb2], chapters[idx_chapter]);
-                            if (result != null)
+                            if (cacheDBIDWrapper != null && cacheDBIDWrapper.cacheDB != null)
                             {
-                                T_FieldData? obj = JsonSerializer.Deserialize<T_FieldData>(result);
-                                if (obj != null)
+                                string? result = cacheDBIDWrapper.cacheDB.TryToGetFromCache(cacheDBIDWrapper.algorithmName, cacheDBIDWrapper.algorithmArgs, bookIDBs[idx_idb1], bookIDBs[idx_idb2], chapters[idx_chapter]);
+                                if (result != null)
                                 {
-                                    doneMatrix[idx_idb1, idx_idb2] = true;
-                                    doneMatrix[idx_idb2, idx_idb1] = true;
-                                    progressBar?.PerformStep(1, $"[PARALLEL] matrixCellChapterJob.Calculate()");
-                                    continue;
+                                    T_FieldData? obj = JsonSerializer.Deserialize<T_FieldData>(result);
+                                    if (obj != null)
+                                    {
+                                        doneMatrix[idx_idb1, idx_idb2] = true;
+                                        doneMatrix[idx_idb2, idx_idb1] = true;
+                                        nowDone++;
+                                        everythingDone = false;
+                                    }
                                 }
                             }
                         }
                     }
                 }
+                while (previousDone < nowDone)
+                {
+                    previousDone++;
+                    progressBar?.PerformStep(1, $"[PARALLEL] matrixCellChapterJob.Calculate()");             
+                }
+
+                if (everythingDone)
+                {
+                    break;
+                }
+                Thread.Sleep(5000);
             }
 
-            Thread.Sleep(5000);
         });
     }
 
