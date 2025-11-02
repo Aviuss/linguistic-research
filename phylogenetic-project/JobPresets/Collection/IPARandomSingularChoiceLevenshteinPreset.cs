@@ -36,6 +36,8 @@ public class IPARandomSingularChoiceLevenshteinPreset : IJobPreset
         Console.WriteLine(levenshteinMatrix.ToString());
 
 
+        if (Program.dontCreateDataInTemporaryFolder) { return; }
+
 
         StaticMethods.SaveTemporaryResults.Save(timeNow, new (string, string)[]
         {

@@ -114,11 +114,13 @@ public class BookMatrix<T_FieldData>
     public void CalculateResultMatrixInParallel(string jobId, bool showProgressBar = true)
     {
         if (matrixCellChapterJob == null) { return; }
-        if (cacheDBIDWrapper == null) {
+        if (cacheDBIDWrapper == null)
+        {
             throw new ArgumentException("Error: Cache not provided");
         }
 
-        using var progressBar = InitProgressBar(showProgressBar);
+        int alreadyCachedResults = ResultsCachedByCache();
+        using var progressBar = InitProgressBar(showProgressBar, MaxNumberOfIterationToPerform() - alreadyCachedResults);
 
         int maxProcesses = Environment.ProcessorCount;
 
@@ -134,58 +136,36 @@ public class BookMatrix<T_FieldData>
             .Select(g => g.Select(v => v.value).ToList())
             .ToList())
         {
-            string arguments = $"{jobId} {string.Join(",", bookIDBs.Select(el => el.ToString()))} {string.Join(",", item.Select(el => el.ToString()))}";
+            string arguments = $"{jobId} {string.Join(",", bookIDBs.Select(el => el.ToString()))} {string.Join(",", item.Select(el => el.ToString()))} true";
 
             tasks.Add(RunParallelProcess(arguments));
         }
 
-        CreateParallelStatusTask(progressBar);
+        CreateParallelStatusTask(progressBar, alreadyCachedResults);
         Task.WaitAll(tasks.ToArray());
 
         CalculateResultMatrix(false);
     }
 
-    private Task CreateParallelStatusTask(ProgressBar? progressBar)
+    private Task CreateParallelStatusTask(ProgressBar? progressBar, int alreadyCached)
     {
+        int originalAlreadyCached = alreadyCached;
         return Task.Run(() =>
         {
-            bool[,] doneMatrix = new bool[this.bookIDBs.Count, this.bookIDBs.Count];
-            int previousDone = 0;
+            int previousDone = alreadyCached;    
+            
             while (true)
             {
-                int nowDone = 0;
-                bool everythingDone = true;
-                for (int idx_idb1 = 0; idx_idb1 < bookIDBs.Count; idx_idb1++)
-                {
-                    for (int idx_idb2 = idx_idb1 + 1; idx_idb2 < bookIDBs.Count; idx_idb2++)
-                    {
-                        for (int idx_chapter = 0; idx_chapter < chapters.Count; idx_chapter++)
-                        {
-                            if (cacheDBIDWrapper != null && cacheDBIDWrapper.cacheDB != null)
-                            {
-                                string? result = cacheDBIDWrapper.cacheDB.TryToGetFromCache(cacheDBIDWrapper.algorithmName, cacheDBIDWrapper.algorithmArgs, bookIDBs[idx_idb1], bookIDBs[idx_idb2], chapters[idx_chapter]);
-                                if (result != null)
-                                {
-                                    T_FieldData? obj = JsonSerializer.Deserialize<T_FieldData>(result);
-                                    if (obj != null)
-                                    {
-                                        doneMatrix[idx_idb1, idx_idb2] = true;
-                                        doneMatrix[idx_idb2, idx_idb1] = true;
-                                        nowDone++;
-                                        everythingDone = false;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+                int nowDone = ResultsCachedByCache();
+        
+
                 while (previousDone < nowDone)
                 {
                     previousDone++;
-                    progressBar?.PerformStep(1, $"[PARALLEL] matrixCellChapterJob.Calculate()");             
+                    progressBar?.PerformStep(1, $"[PARALLEL] matrixCellChapterJob.Calculate() | CachedAtTheBeginning: {originalAlreadyCached}");
                 }
 
-                if (everythingDone)
+                if (nowDone == MaxNumberOfIterationToPerform())
                 {
                     break;
                 }
@@ -193,6 +173,37 @@ public class BookMatrix<T_FieldData>
             }
 
         });
+    }
+    
+    private int ResultsCachedByCache()
+    {
+        int nowDone = 0;
+        bool[,] doneMatrix = new bool[this.bookIDBs.Count, this.bookIDBs.Count];
+        for (int idx_idb1 = 0; idx_idb1 < bookIDBs.Count; idx_idb1++)
+        {
+            for (int idx_idb2 = idx_idb1 + 1; idx_idb2 < bookIDBs.Count; idx_idb2++)
+            {
+                for (int idx_chapter = 0; idx_chapter < chapters.Count; idx_chapter++)
+                {
+                    if (cacheDBIDWrapper != null && cacheDBIDWrapper.cacheDB != null)
+                    {
+                        string? result = cacheDBIDWrapper.cacheDB.TryToGetFromCache(cacheDBIDWrapper.algorithmName, cacheDBIDWrapper.algorithmArgs, bookIDBs[idx_idb1], bookIDBs[idx_idb2], chapters[idx_chapter]);
+                        if (result != null)
+                        {
+                            T_FieldData? obj = JsonSerializer.Deserialize<T_FieldData>(result);
+                            if (obj != null)
+                            {
+                                doneMatrix[idx_idb1, idx_idb2] = true;
+                                doneMatrix[idx_idb2, idx_idb1] = true;
+                                nowDone++;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return nowDone;
     }
 
     private Task RunParallelProcess(string arguments)
@@ -231,14 +242,20 @@ public class BookMatrix<T_FieldData>
             });
     }
 
-    public ProgressBar? InitProgressBar(bool showProgressBar = true)
+    public int MaxNumberOfIterationToPerform()
+    {
+        return bookIDBs.Count * (bookIDBs.Count - 1) / 2 * chapters.Count;
+    }
+
+    public ProgressBar? InitProgressBar(bool showProgressBar = true, int? customMax = null)
     {
         if (showProgressBar == false)
         {
             return null;
         }
 
-        var max = bookIDBs.Count * (bookIDBs.Count - 1) / 2 * chapters.Count;
+        int max = customMax ?? MaxNumberOfIterationToPerform();
+        
         var progressBar = new ProgressBar() { Maximum = max };
         progressBar.Delay = 333;
 

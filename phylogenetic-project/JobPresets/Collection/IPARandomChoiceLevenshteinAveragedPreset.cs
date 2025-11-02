@@ -45,7 +45,7 @@ public class IPARandomChoiceLevenshteinAveragedPreset : IJobPreset
         }
         Console.WriteLine(levenshteinMatrix.ToString());
 
-
+        if (Program.dontCreateDataInTemporaryFolder) { return; }
 
         StaticMethods.SaveTemporaryResults.Save(timeNow, new (string, string)[]
         {
@@ -56,6 +56,7 @@ public class IPARandomChoiceLevenshteinAveragedPreset : IJobPreset
              - chapter text from: {getChapterConstruct.chapterGetterId}
              - bookIDBs: {string.Join(", ", bookIDBs.Select(idb => idb.ToString()))}
              - chapters: {string.Join(", ", chapters.Select(chap => chap.ToString()))}
+             - randomSize: {algorithmArgs.randomSize}
             """)
         });
         
