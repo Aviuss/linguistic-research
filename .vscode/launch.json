@@ -11,7 +11,7 @@
             "program": "${workspaceFolder}/phylogenetic-project/bin/Debug/net8.0/phylogenetic-project.dll",
             "preLaunchTask": "dotnet build",
             "cwd": "${workspaceFolder}/phylogenetic-project",
-            "console": "integratedTerminal"
+            "console": "externalTerminal"
         },
     ]
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.Text.Json;
 using iluvadev.ConsoleProgressBar;
@@ -50,9 +51,9 @@ public class BookMatrix<T_FieldData>
 
     public decimal[,]? CalculateResultMatrix(bool showProgressBar = true)
     {
-        using var progressBar = InitProgressBar(showProgressBar);
-
         if (matrixCellChapterJob == null) { return null; }
+
+        using var progressBar = InitProgressBar(showProgressBar);
 
         result_matrix = new decimal[this.bookIDBs.Count, this.bookIDBs.Count];
 
@@ -110,7 +111,109 @@ public class BookMatrix<T_FieldData>
         return result_matrix;
     }
 
-    public ProgressBar? InitProgressBar(bool showProgressBar)
+    public void CalculateResultMatrixInParallel(string jobId, bool showProgressBar = true)
+    {
+        if (matrixCellChapterJob == null) { return; }
+
+        using var progressBar = InitProgressBar(showProgressBar);
+
+        int maxProcesses = Environment.ProcessorCount;
+
+
+        var tasks = new List<Task>();
+
+        int size = (int)Math.Ceiling((double)chapters.Count / maxProcesses);
+
+        
+        foreach (var item in chapters
+            .Select((value, index) => new { value, index })
+            .GroupBy(x => x.index / size)
+            .Select(g => g.Select(v => v.value).ToList())
+            .ToList())
+        {
+            string arguments = $"{jobId} {string.Join(",", bookIDBs.Select(el => el.ToString()))} {string.Join(",", item.Select(el => el.ToString()))}";
+
+            tasks.Add(RunParallelProcess(arguments));
+        }
+
+        CreateParallelStatusTask(progressBar);
+        Task.WaitAll(tasks.ToArray());
+
+        CalculateResultMatrix(false);
+    }
+
+    private Task CreateParallelStatusTask(ProgressBar? progressBar)
+    {
+        return Task.Run(() =>
+        {
+            bool[,] doneMatrix = new bool[this.bookIDBs.Count, this.bookIDBs.Count];
+
+            for (int idx_idb1 = 0; idx_idb1 < bookIDBs.Count; idx_idb1++)
+            {
+                for (int idx_idb2 = idx_idb1 + 1; idx_idb2 < bookIDBs.Count; idx_idb2++)
+                {
+                    for (int idx_chapter = 0; idx_chapter < chapters.Count; idx_chapter++)
+                    {
+                        if (cacheDBIDWrapper != null && cacheDBIDWrapper.cacheDB != null)
+                        {
+                            string? result = cacheDBIDWrapper.cacheDB.TryToGetFromCache(cacheDBIDWrapper.algorithmName, cacheDBIDWrapper.algorithmArgs, bookIDBs[idx_idb1], bookIDBs[idx_idb2], chapters[idx_chapter]);
+                            if (result != null)
+                            {
+                                T_FieldData? obj = JsonSerializer.Deserialize<T_FieldData>(result);
+                                if (obj != null)
+                                {
+                                    doneMatrix[idx_idb1, idx_idb2] = true;
+                                    doneMatrix[idx_idb2, idx_idb1] = true;
+                                    progressBar?.PerformStep(1, $"[PARALLEL] matrixCellChapterJob.Calculate()");
+                                    continue;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            Thread.Sleep(5000);
+        });
+    }
+
+    private Task RunParallelProcess(string arguments)
+    {
+        return Task.Run(() =>
+            {
+                var psi = new ProcessStartInfo
+                {
+                    FileName = "dotnet",
+                    Arguments = $"run --project " + Path.Combine(Program.projectPath, "phylogenetic-project") + " " + arguments,
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false
+                };
+
+                var proc = Process.Start(psi);
+                if (proc == null)
+                {
+                    throw new ArgumentException("Process didn't start");
+                }
+
+                lock (Program.runningProcesses)
+                    Program.runningProcesses.Add(proc);
+
+                if (Program.cts.Token.IsCancellationRequested)
+                {
+                    proc.Kill(entireProcessTree: true);
+                    return;
+                }
+
+                string output = proc.StandardOutput.ReadToEnd();
+                proc.WaitForExit();
+
+                lock (Program.runningProcesses)
+                    Program.runningProcesses.Remove(proc);
+
+            });
+    }
+
+    public ProgressBar? InitProgressBar(bool showProgressBar = true)
     {
         if (showProgressBar == false)
         {

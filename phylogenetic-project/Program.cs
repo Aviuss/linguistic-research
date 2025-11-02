@@ -18,8 +18,29 @@ public class Program
     public static ConcurrentDictionary<int, string>? mapIdbToName = null;
     public static List<Persistance.LanguageRules>? listOfLanguageRules = null;
 
+    public static bool doParallelIfPossible = false;
+    public static bool showProgressBar = false;
+
+
+    public static List<Process> runningProcesses = new();
+    public static CancellationTokenSource cts = new();
+
+
     static void Main(string[] args)
     {
+        Console.CancelKeyPress += (s, e) =>
+        {
+            Console.WriteLine("Stopping all processes...");
+            e.Cancel = true;
+            cts.Cancel();
+            KillAllProcesses();
+        };
+
+        AppDomain.CurrentDomain.ProcessExit += (s, e) =>
+        {
+            KillAllProcesses();
+        };
+
         Console.WriteLine("Welcome to phylogenetic project, where research paper is being created in the Poznan University of Technology!");
 
         sadownikdb = new Persistance.Sadownikdb(
@@ -48,6 +69,9 @@ public class Program
 
         if (args.Length == 0)
         {
+            doParallelIfPossible = true;
+            showProgressBar = true;
+
             List<int> pgwary = new List<int>() { 27, 29, 36, 38, 46, 37, 44, 39, 43, 33, 42 };
             pgwary.Sort();
 
@@ -55,9 +79,9 @@ public class Program
             var jobFactory = new JobPresents.JobFactory();
             IJobPreset job = jobFactory.Create("IPARandomChoiceLevenshteinPreset");
             job.bookIDBs = pgwary;
-            job.chapters = new() { 1 };
+            job.chapters = new() { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27 };
             job.getChapterConstruct = sadownikdb;
-            job.Start();    
+            job.Start();
         }
 
 
@@ -67,5 +91,21 @@ public class Program
         Console.WriteLine("Program finished running... .. .");
     }
     
+    static void KillAllProcesses()
+    {
+        lock (runningProcesses)
+        {
+            foreach (var p in runningProcesses)
+            {
+                try
+                {
+                    if (!p.HasExited)
+                        p.Kill(entireProcessTree: true);
+                }
+                catch { /* ignore */ }
+            }
+            runningProcesses.Clear();
+        }
+    }
 
 }

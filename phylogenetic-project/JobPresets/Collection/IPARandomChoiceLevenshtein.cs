@@ -36,7 +36,13 @@ public class IPARandomChoiceLevenshtein : IJobPreset
             cacheDBIDWrapper_: new Persistance.CacheDBIDWrapper(Program.cacheDB, jobId, JsonSerializer.Serialize(algorithmArgs))
          );
 
-        _ = levenshteinMatrix.CalculateResultMatrix();
+        if (Program.doParallelIfPossible)
+        {
+            levenshteinMatrix.CalculateResultMatrixInParallel(jobId, Program.showProgressBar);
+        } else
+        {
+            _ = levenshteinMatrix.CalculateResultMatrix(Program.showProgressBar);
+        }
         Console.WriteLine(levenshteinMatrix.ToString());
 
 
