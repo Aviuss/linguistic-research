@@ -90,21 +90,3 @@ public class Sadownikdb: IDisposable, IGetChapter
         GC.SuppressFinalize(this);
     }
 }
-
-struct CacheKey
-{
-    public int Key1 { get; }
-    public int Key2 { get; }
-
-    public CacheKey(int key1, int key2)
-    {
-        Key1 = key1;
-        Key2 = key2;
-    }
-
-    public override bool Equals(object? obj) => obj is CacheKey other && Equals(other);
-
-    public bool Equals(CacheKey other) => Key1 == other.Key1 && Key2 == other.Key2;
-
-    public override int GetHashCode() => HashCode.Combine(Key1, Key2);
-}

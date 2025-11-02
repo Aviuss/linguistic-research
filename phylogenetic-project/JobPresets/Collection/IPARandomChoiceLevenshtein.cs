@@ -12,7 +12,7 @@ namespace phylogenetic_project.JobPresets.Collection;
 
 public class IPARandomChoiceLevenshtein : IJobPreset
 {
-    public static string jobId => "IPARandomChoiceLevenshteinAlgorithm";
+    public static string jobId => "IPARandomChoiceLevenshteinPreset";
 
     public List<int> bookIDBs { get; set; } = new List<int>();
     public List<int> chapters { get; set; } = new List<int>();
@@ -24,10 +24,16 @@ public class IPARandomChoiceLevenshtein : IJobPreset
     {
         ArgumentNullException.ThrowIfNull(getChapterConstruct);
 
+        var algorithmArgs = new
+        {
+            randomSize = 10000
+        };
+
         var levenshteinMatrix = new Matrices.BookMatrix<Matrices.CellChapterJobs.LevenshteinIndividualDataDecimal>(
-             bookIDBs_: bookIDBs,
-             chapters_: chapters,
-             matrixCellChapterJob_: new Matrices.CellChapterJobs.IPARandomChoiceLevenshteinCellChapterJob(getChapterConstruct)
+            bookIDBs_: bookIDBs,
+            chapters_: chapters,
+            matrixCellChapterJob_: new Matrices.CellChapterJobs.IPARandomChoiceLevenshteinCellChapterJob(getChapterConstruct, algorithmArgs.randomSize),
+            cacheDBIDWrapper_: new Persistance.CacheDBIDWrapper(Program.cacheDB, jobId, JsonSerializer.Serialize(algorithmArgs))
          );
 
         _ = levenshteinMatrix.CalculateResultMatrix();

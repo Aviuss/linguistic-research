@@ -4,8 +4,8 @@ namespace phylogenetic_project.Matrices.CellChapterJobs;
 
 public struct LevenshteinIndividualDataInt
 {
-    public int levensthein_distance;
-    public int max_chapter_length;
+    public int levensthein_distance { get; set; }
+    public int max_chapter_length { get; set; }
 
     public LevenshteinIndividualDataInt(int distance, int MaxLength)
     {

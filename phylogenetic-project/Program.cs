@@ -14,7 +14,7 @@ public class Program
     public static readonly string dataAndResultsPath = Path.Combine(projectPath, @"data and results");
     
     public static Persistance.Sadownikdb? sadownikdb;
-
+    public static Persistance.CacheDB? cacheDB;
     public static ConcurrentDictionary<int, string>? mapIdbToName = null;
     public static List<Persistance.LanguageRules>? listOfLanguageRules = null;
 
@@ -28,13 +28,16 @@ public class Program
         mapIdbToName = Persistance.MapIdbToName.ReadFromFile();
         listOfLanguageRules = Persistance.GetLanguageRules.ReadFromFile();
 
-        
+        cacheDB = new Persistance.CacheDB(
+            dbPath: Path.Combine(dataAndResultsPath, "cache/cache.sqlite")
+        );
+
         if (args.Length == 3)
         {
             string jobId = args[0].Trim();
             List<int> bookIdbs = args[1].Split(",").Select(el => int.Parse(el)).ToList();
             List<int> chapters = args[2].Split(",").Select(el => int.Parse(el)).ToList();
-            
+
             var jobFactory = new JobPresents.JobFactory();
             IJobPreset job = jobFactory.Create(jobId);
             job.bookIDBs = bookIdbs;
@@ -50,7 +53,7 @@ public class Program
 
 
             var jobFactory = new JobPresents.JobFactory();
-            IJobPreset job = jobFactory.Create("IPARandomChoiceLevenshteinAlgorithm");
+            IJobPreset job = jobFactory.Create("IPARandomChoiceLevenshteinPreset");
             job.bookIDBs = pgwary;
             job.chapters = new() { 1 };
             job.getChapterConstruct = sadownikdb;
@@ -59,6 +62,7 @@ public class Program
 
 
 
+        cacheDB.Dispose();
         sadownikdb.Dispose();
         Console.WriteLine("Program finished running... .. .");
     }

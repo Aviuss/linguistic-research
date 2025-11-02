@@ -1,9 +1,11 @@
 using System;
 using System.Globalization;
+using System.Text.Json;
 using iluvadev.ConsoleProgressBar;
 using Microsoft.VisualBasic;
 using phylogenetic_project.Algorithms;
 using phylogenetic_project.Matrices.CellChapterJobs;
+using phylogenetic_project.Persistance;
 using SQLitePCL;
 
 namespace phylogenetic_project.Matrices;
@@ -15,13 +17,16 @@ public class BookMatrix<T_FieldData>
 
     public List<int> bookIDBs = new List<int>();
     public List<int> chapters = new List<int>();
-   
+
     public IMatrixCellChapterJob<T_FieldData>? matrixCellChapterJob;
+
+    public CacheDBIDWrapper? cacheDBIDWrapper;
 
     public BookMatrix(
         List<int> bookIDBs_,
         List<int> chapters_,
-        IMatrixCellChapterJob<T_FieldData>? matrixCellChapterJob_)
+        IMatrixCellChapterJob<T_FieldData>? matrixCellChapterJob_,
+        CacheDBIDWrapper? cacheDBIDWrapper_ = null)
     {
         bookIDBs = bookIDBs_;
         chapters = chapters_;
@@ -40,6 +45,7 @@ public class BookMatrix<T_FieldData>
             matrixCellChapterJob.bookIDBs = bookIDBs;
             matrixCellChapterJob.chapters = chapters;
         }
+        cacheDBIDWrapper = cacheDBIDWrapper_;
     }
 
     public decimal[,]? CalculateResultMatrix(bool showProgressBar = true)
@@ -56,9 +62,25 @@ public class BookMatrix<T_FieldData>
             {
                 for (int idx_chapter = 0; idx_chapter < chapters.Count; idx_chapter++)
                 {
+                    if (cacheDBIDWrapper != null && cacheDBIDWrapper.cacheDB != null)
+                    {
+                        string? result = cacheDBIDWrapper.cacheDB.TryToGetFromCache(cacheDBIDWrapper.algorithmName, cacheDBIDWrapper.algorithmArgs, bookIDBs[idx_idb1], bookIDBs[idx_idb2], chapters[idx_chapter]);
+                        if (result != null)
+                        {
+                            T_FieldData? obj = JsonSerializer.Deserialize<T_FieldData>(result);
+                            if (obj != null)
+                            {
+                                matrix[idx_idb1, idx_idb2][idx_chapter] = obj;
+                                matrix[idx_idb2, idx_idb1][idx_chapter] = obj;
+                                progressBar?.PerformStep(1, $"matrixCellChapterJob.Calculate(idb_{idx_idb1}, idb_{idx_idb2}, chap_{idx_chapter})");
+                                continue;
+                            }
+                        }
+                    }
                     matrix[idx_idb1, idx_idb2][idx_chapter] = matrixCellChapterJob.Calculate(idx_idb1, idx_idb2, idx_chapter);
                     matrix[idx_idb2, idx_idb1][idx_chapter] = matrix[idx_idb1, idx_idb2][idx_chapter];
-                    
+
+                    cacheDBIDWrapper?.cacheDB?.InsertCache(cacheDBIDWrapper.algorithmName, cacheDBIDWrapper.algorithmArgs, JsonSerializer.Serialize(matrix[idx_idb1, idx_idb2][idx_chapter]), bookIDBs[idx_idb1], bookIDBs[idx_idb2], chapters[idx_chapter]);
                     progressBar?.PerformStep(1, $"matrixCellChapterJob.Calculate(idb_{idx_idb1}, idb_{idx_idb2}, chap_{idx_chapter})");
                 }
             }

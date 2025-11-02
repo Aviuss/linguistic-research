@@ -13,10 +13,12 @@ public class IPARandomChoiceLevenshteinCellChapterJob: IMatrixCellChapterJob<Lev
     public List<int> chapters { get; set; } = new List<int>();
 
     Persistance.IGetChapter GetChapterConstruct;
+    long randomSize = 100;
 
-    public IPARandomChoiceLevenshteinCellChapterJob(Persistance.IGetChapter getChapterConstruct)
+    public IPARandomChoiceLevenshteinCellChapterJob(Persistance.IGetChapter getChapterConstruct, long randomSize_)
     {
         GetChapterConstruct = getChapterConstruct;
+        randomSize = randomSize_;
     }
 
     public LevenshteinIndividualDataDecimal Calculate(int idx_idb1, int idx_idb2, int idx_chapter)
@@ -43,7 +45,7 @@ public class IPARandomChoiceLevenshteinCellChapterJob: IMatrixCellChapterJob<Lev
         );
 
         
-        return Algorithms.LevenshteinIPARandomChoice.Calculate(ipaText_idb1, ipaText_idb2);
+        return Algorithms.LevenshteinIPARandomChoice.Calculate(ipaText_idb1, ipaText_idb2, randomSize);
     }
 
     public decimal MergeChapters(LevenshteinIndividualDataDecimal[] chaptersList)

@@ -12,7 +12,7 @@ namespace phylogenetic_project.JobPresets.Collection;
 
 public class StandardLevenshtein : IJobPreset
 {
-    public static string jobId => "StandardLevenshteinAlgorithm";
+    public static string jobId => "StandardLevenshteinPreset";
 
     public List<int> bookIDBs { get; set; } = new List<int>();
     public List<int> chapters { get; set; } = new List<int>();
@@ -80,16 +80,3 @@ public class StandardLevenshtein : IJobPreset
         );
     }
 }
-
-internal record struct NewStruct(string Item1, string Item2)
-{
-    public static implicit operator (string, string)(NewStruct value)
-    {
-        return (value.Item1, value.Item2);
-    }
-
-    public static implicit operator NewStruct((string, string) value)
-    {
-        return new NewStruct(value.Item1, value.Item2);
-    }
-}   
