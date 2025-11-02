@@ -26,6 +26,8 @@ public class Program
     public static CancellationTokenSource cts = new();
     public static bool dontCreateDataInTemporaryFolder = false;
 
+    public static ConcurrentDictionary<(string From, string To), decimal>? ipaLetterDistanceDict;
+
     static void Main(string[] args)
     {
         Console.CancelKeyPress += (s, e) =>
@@ -52,6 +54,8 @@ public class Program
         cacheDB = new Persistance.CacheDB(
             dbPath: Path.Combine(dataAndResultsPath, "cache/cache.sqlite")
         );
+
+        ipaLetterDistanceDict = Persistance.IpaLetterDistance.ReadPhoneticCsv(Path.Combine(dataAndResultsPath, "json settings", "ipa_letter_distance.csv"));
 
         if (args.Length == 4)
         {
@@ -80,7 +84,7 @@ public class Program
             var jobFactory = new JobPresents.JobFactory();
             IJobPreset job = jobFactory.Create("IPARandomChoiceLevenshteinAveragedPreset");
             job.bookIDBs = pgwary;
-            job.chapters = new() { 1 , 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27 };
+            job.chapters = new() { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27 };
             job.getChapterConstruct = sadownikdb;
             job.Start();
         }
