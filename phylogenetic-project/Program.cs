@@ -26,7 +26,7 @@ public class Program
     public static CancellationTokenSource cts = new();
     public static bool dontCreateDataInTemporaryFolder = false;
 
-    public static ConcurrentDictionary<(string From, string To), decimal>? ipaLetterDistanceDict;
+    public static IpaDistanceProvider? ipaLetterDistanceDict;
 
     static void Main(string[] args)
     {
@@ -55,7 +55,7 @@ public class Program
             dbPath: Path.Combine(dataAndResultsPath, "cache/cache.sqlite")
         );
 
-        ipaLetterDistanceDict = Persistance.IpaLetterDistance.ReadPhoneticCsv(Path.Combine(dataAndResultsPath, "json settings", "ipa_letter_distance.csv"));
+        ipaLetterDistanceDict = new Persistance.IpaDistanceProvider(Path.Combine(dataAndResultsPath, "json settings", "ipa_letter_distance.csv"));
 
         if (args.Length == 4)
         {
@@ -95,7 +95,7 @@ public class Program
         sadownikdb.Dispose();
         Console.WriteLine("Program finished running... .. .");
     }
-    
+
     static void KillAllProcesses()
     {
         lock (runningProcesses)

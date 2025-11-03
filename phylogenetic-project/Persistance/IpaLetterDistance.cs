@@ -5,9 +5,30 @@ using System.IO;
 using System.Linq;
 namespace phylogenetic_project.Persistance;
 
-public class IpaLetterDistance
+public class IpaDistanceProvider
 {
-    public static ConcurrentDictionary<(string From, string To), decimal> ReadPhoneticCsv(string path)
+    private ConcurrentDictionary<(string, string), decimal> ipaLetterDistanceDict;
+
+    public IpaDistanceProvider(string path)
+    {   
+        ipaLetterDistanceDict = ReadPhoneticCsv(path);
+    }
+
+    public decimal this[string a, string b]
+    {
+        get
+        {
+            if (a == b)
+                return 0;
+
+            var key = string.CompareOrdinal(a, b) < 0 ? (a, b) : (b, a);
+            return ipaLetterDistanceDict.TryGetValue(key, out var value)
+                ? value
+                : 1;
+        }
+    }
+
+    public static ConcurrentDictionary<(string, string), decimal> ReadPhoneticCsv(string path)
     {
         var dict = new ConcurrentDictionary<(string, string), decimal>();
         var numberFormat = new NumberFormatInfo { NumberDecimalSeparator = "." };
@@ -47,7 +68,7 @@ public class IpaLetterDistance
                     {
                         dict.TryAdd((colSymbol, rowSymbol), value);
                     }
-                    
+
                 }
             }
         }
@@ -56,3 +77,5 @@ public class IpaLetterDistance
     }
 
 }
+
+

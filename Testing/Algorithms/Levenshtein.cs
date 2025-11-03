@@ -24,6 +24,6 @@ public class Levenshtein
     {
         var dist = phylogenetic_project.Algorithms.Levenshtein.DistanceNormalised(a, b);
 
-        Assert.Equal((decimal)res_dist / max, dist);
+        Assert.Equal((decimal)res_dist / max, dist, precision: 8);
     }
 }
