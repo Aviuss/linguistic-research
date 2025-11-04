@@ -32,7 +32,20 @@ public class CacheDB: IDisposable
                 timestamp INTEGER
             );
         ";
-        command.ExecuteNonQuery();        
+        command.ExecuteNonQuery();
+
+        using (var walCommand = connection.CreateCommand())
+        {
+            walCommand.CommandText = "PRAGMA journal_mode = WAL;";
+            walCommand.ExecuteNonQuery();
+        }   
+        
+        using (var timeoutCommand = connection.CreateCommand())
+        {
+            timeoutCommand.CommandText = "PRAGMA busy_timeout = 5000;"; // 5 seconds
+            timeoutCommand.ExecuteNonQuery();
+        }
+
     }
 
     public void InsertCache(string algorithmName, string algorithmArgs, string algorithmResult, int idb1, int idb2, int chapter)
