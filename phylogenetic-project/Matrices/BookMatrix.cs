@@ -210,10 +210,12 @@ public class BookMatrix<T_FieldData>
     {
         return Task.Run(() =>
             {
+                var runCommand = "run --project \"" + Path.Combine(Program.projectPath, "phylogenetic-project") + "\" " + arguments;
+
                 var psi = new ProcessStartInfo
                 {
                     FileName = "dotnet",
-                    Arguments = $"run --project " + Path.Combine(Program.projectPath, "phylogenetic-project") + " " + arguments,
+                    Arguments = runCommand,
                     RedirectStandardOutput = true,
                     UseShellExecute = false
                 };
