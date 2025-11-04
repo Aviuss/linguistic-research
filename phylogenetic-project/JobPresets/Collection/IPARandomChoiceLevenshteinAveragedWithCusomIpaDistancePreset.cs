@@ -10,7 +10,7 @@ using System.Text.Json;
 
 namespace phylogenetic_project.JobPresets.Collection;
 
-public class IPARandomChoiceLevenshteinAveragedPresetWithCusomIpaDistance : IJobPreset
+public class IPARandomChoiceLevenshteinAveragedWithCusomIpaDistancePreset : IJobPreset
 {
     public static string jobId => "IPARandomChoiceLevenshteinAveragedWithCusomIpaDistancePreset";
 
@@ -26,7 +26,7 @@ public class IPARandomChoiceLevenshteinAveragedPresetWithCusomIpaDistance : IJob
 
         var algorithmArgs = new
         {
-            randomSize = 10000
+            randomSize = 200
         };
 
         ArgumentNullException.ThrowIfNull(Program.ipaLetterDistanceDict);
