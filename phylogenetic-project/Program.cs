@@ -74,7 +74,7 @@ public class Program
 
         if (args.Length == 0)
         {
-            doParallelIfPossible = false;
+            doParallelIfPossible = true;
             showProgressBar = true;
 
             List<int> pgwary = new List<int>() { 27, 29, 36, 38, 46, 37, 44, 39, 43, 33, 42 };
@@ -84,7 +84,7 @@ public class Program
             var jobFactory = new JobPresents.JobFactory();
             IJobPreset job = jobFactory.Create("IPARandomChoiceLevenshteinAveragedWithCusomIpaDistancePreset");
             job.bookIDBs = pgwary;
-            job.chapters = new() { 1, }; //2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27 };
+            job.chapters = new() { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27 };
             job.getChapterConstruct = sadownikdb;
             job.Start();
         }

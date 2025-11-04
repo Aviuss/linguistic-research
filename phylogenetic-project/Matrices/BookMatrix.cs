@@ -53,7 +53,9 @@ public class BookMatrix<T_FieldData>
     {
         if (matrixCellChapterJob == null) { return null; }
 
-        using var progressBar = InitProgressBar(showProgressBar);
+        int alreadyCachedResults = ResultsCachedByCache();
+        using var progressBar = InitProgressBar(showProgressBar, MaxNumberOfIterationToPerform() - alreadyCachedResults);
+        CreateParallelStatusTask(progressBar, alreadyCachedResults);
 
         result_matrix = new decimal[this.bookIDBs.Count, this.bookIDBs.Count];
 
@@ -73,7 +75,6 @@ public class BookMatrix<T_FieldData>
                             {
                                 matrix[idx_idb1, idx_idb2][idx_chapter] = obj;
                                 matrix[idx_idb2, idx_idb1][idx_chapter] = obj;
-                                progressBar?.PerformStep(1, $"matrixCellChapterJob.Calculate(idb_{idx_idb1}, idb_{idx_idb2}, chap_{idx_chapter})");
                                 continue;
                             }
                         }
@@ -82,7 +83,6 @@ public class BookMatrix<T_FieldData>
                     matrix[idx_idb2, idx_idb1][idx_chapter] = matrix[idx_idb1, idx_idb2][idx_chapter];
 
                     cacheDBIDWrapper?.cacheDB?.InsertCache(cacheDBIDWrapper.algorithmName, cacheDBIDWrapper.algorithmArgs, JsonSerializer.Serialize(matrix[idx_idb1, idx_idb2][idx_chapter]), bookIDBs[idx_idb1], bookIDBs[idx_idb2], chapters[idx_chapter]);
-                    progressBar?.PerformStep(1, $"matrixCellChapterJob.Calculate(idb_{idx_idb1}, idb_{idx_idb2}, chap_{idx_chapter})");
                 }
             }
         }
@@ -162,7 +162,7 @@ public class BookMatrix<T_FieldData>
                 while (previousDone < nowDone)
                 {
                     previousDone++;
-                    progressBar?.PerformStep(1, $"[PARALLEL] matrixCellChapterJob.Calculate() | CachedAtTheBeginning: {originalAlreadyCached}");
+                    progressBar?.PerformStep(1, $"matrixCellChapterJob.Calculate() | CachedAtTheBeginning: {originalAlreadyCached}");
                 }
 
                 if (nowDone == MaxNumberOfIterationToPerform())
