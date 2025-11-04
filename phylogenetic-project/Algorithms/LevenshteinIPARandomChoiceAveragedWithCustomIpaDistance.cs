@@ -1,15 +1,14 @@
 using System;
-using System.Text;
 using phylogenetic_project.Matrices.CellChapterJobs;
 
 namespace phylogenetic_project.Algorithms;
 
-public class LevenshteinIPARandomChoiceAveraged
+public class LevenshteinIPARandomChoiceAveragedWithCustomIpaDistance
 {
     public static LevenshteinIndividualDataDecimal Calculate
-        (List<string[]> inputText1, List<string[]> inputText2, long randomSize = 10000)
+        (List<string[]> inputText1, List<string[]> inputText2, Persistance.IpaDistanceProvider ipaLetterDistanceDict, long randomSize = 10000)
     {
-        long avgLevenshteinDistance = 0;
+        decimal avgLevenshteinDistance = 0;
         long avgMaxDistance = 0;
 
         var enumerator = IPARandomChoiceGenerator.ReturnRandomChoice(inputText1, inputText2, randomSize);
@@ -18,12 +17,12 @@ public class LevenshteinIPARandomChoiceAveraged
         foreach (var (txt1String, txt2String) in enumerator)
         {
             count++;
-            avgLevenshteinDistance += Algorithms.Levenshtein.Distance(txt1String, txt2String);
+            avgLevenshteinDistance += Algorithms.LevenshteinCustomIpaDistance.Distance(txt1String, txt2String, ipaLetterDistanceDict);
             avgMaxDistance += Math.Max(txt1String.Length, txt2String.Length);
         }
 
         return new LevenshteinIndividualDataDecimal(
-            (decimal)avgLevenshteinDistance / count,
+            avgLevenshteinDistance / count,
             (decimal)avgMaxDistance / count
         );
     }
