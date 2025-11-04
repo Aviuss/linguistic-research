@@ -26,7 +26,7 @@ public class IPARandomChoiceLevenshteinAveragedWithCusomIpaDistancePreset : IJob
 
         var algorithmArgs = new
         {
-            randomSize = 200
+            randomSize = 100
         };
 
         ArgumentNullException.ThrowIfNull(Program.ipaLetterDistanceDict);
