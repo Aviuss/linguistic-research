@@ -31,20 +31,31 @@ public class IPARandomChoiceLevenshteinAveragedWithCusomIpaDistancePreset : IJob
 
         ArgumentNullException.ThrowIfNull(Program.ipaLetterDistanceDict);
 
-        var levenshteinMatrix = new Matrices.BookMatrix<Matrices.CellChapterJobs.LevenshteinIndividualDataDecimal>(
+        Matrices.BookMatrix<Matrices.CellChapterJobs.LevenshteinIndividualDataDecimal> levenshteinMatrix;
+
+        levenshteinMatrix = new Matrices.BookMatrix<Matrices.CellChapterJobs.LevenshteinIndividualDataDecimal>(
             bookIDBs_: bookIDBs,
             chapters_: chapters,
-            matrixCellChapterJob_: new Matrices.CellChapterJobs.IPARandomChoiceLevenshteinCellChapterJobWithCustomIpaDistance(getChapterConstruct, algorithmArgs.randomSize, Program.ipaLetterDistanceDict),
+            matrixCellChapterJob_: new Matrices.CellChapterJobs.IPARandomChoiceLevenshteinCellChapterJobWithCustomIpaDistance(
+                getChapterConstruct,
+                algorithmArgs.randomSize,
+                Program.ipaLetterDistanceDict,
+                Program.doParallelIfPossible
+            ),
             cacheDBIDWrapper_: new Persistance.CacheDBIDWrapper(Program.cacheDB, jobId, JsonSerializer.Serialize(algorithmArgs))
-         );
+        );
 
-        if (Program.doParallelIfPossible)
+        _ = levenshteinMatrix.CalculateResultMatrix(Program.showProgressBar);
+
+        /*if (Program.doParallelIfPossible)
         {
             levenshteinMatrix.CalculateResultMatrixInParallel(jobId, Program.showProgressBar);
-        } else
+        }
+        else
         {
             _ = levenshteinMatrix.CalculateResultMatrix(Program.showProgressBar);
-        }
+        }*/
+
         Console.WriteLine(levenshteinMatrix.ToString());
 
         if (Program.dontCreateDataInTemporaryFolder) { return; }

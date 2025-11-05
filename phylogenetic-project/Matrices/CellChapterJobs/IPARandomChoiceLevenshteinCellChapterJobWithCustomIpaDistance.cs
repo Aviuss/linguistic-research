@@ -15,12 +15,14 @@ public class IPARandomChoiceLevenshteinCellChapterJobWithCustomIpaDistance: IMat
     Persistance.IGetChapter GetChapterConstruct;
     long randomSize = 100;
     Persistance.IpaDistanceProvider ipaDistanceElement;
-    
-    public IPARandomChoiceLevenshteinCellChapterJobWithCustomIpaDistance(Persistance.IGetChapter getChapterConstruct, long randomSize_, Persistance.IpaDistanceProvider ipaDistanceElement_)
+    bool parallelExecution;
+
+    public IPARandomChoiceLevenshteinCellChapterJobWithCustomIpaDistance(Persistance.IGetChapter getChapterConstruct, long randomSize_, Persistance.IpaDistanceProvider ipaDistanceElement_, bool parallelExecution_ = false)
     {
         GetChapterConstruct = getChapterConstruct;
         randomSize = randomSize_;
         ipaDistanceElement = ipaDistanceElement_;
+        parallelExecution = parallelExecution_;
     }
 
     public LevenshteinIndividualDataDecimal Calculate(int idx_idb1, int idx_idb2, int idx_chapter)
@@ -40,13 +42,16 @@ public class IPARandomChoiceLevenshteinCellChapterJobWithCustomIpaDistance: IMat
             text_idb1,
             ipaRule_idb1
         );
-        
+
         var ipaText_idb2 = StaticMethods.IPA.ConvertToIpa(
             text_idb2,
             ipaRule_idb2
         );
 
-        
+        if (parallelExecution)
+        {
+            return Algorithms.LevenshteinIPARandomChoiceAveragedWithCustomIpaDistanceInParallel.Calculate(ipaText_idb1, ipaText_idb2, ipaDistanceElement, randomSize);
+        }        
         return Algorithms.LevenshteinIPARandomChoiceAveragedWithCustomIpaDistance.Calculate(ipaText_idb1, ipaText_idb2, ipaDistanceElement, randomSize);
     }
 
