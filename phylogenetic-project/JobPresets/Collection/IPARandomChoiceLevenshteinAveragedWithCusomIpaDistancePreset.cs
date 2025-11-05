@@ -47,15 +47,6 @@ public class IPARandomChoiceLevenshteinAveragedWithCusomIpaDistancePreset : IJob
 
         _ = levenshteinMatrix.CalculateResultMatrix(Program.showProgressBar);
 
-        /*if (Program.doParallelIfPossible)
-        {
-            levenshteinMatrix.CalculateResultMatrixInParallel(jobId, Program.showProgressBar);
-        }
-        else
-        {
-            _ = levenshteinMatrix.CalculateResultMatrix(Program.showProgressBar);
-        }*/
-
         Console.WriteLine(levenshteinMatrix.ToString());
 
         if (Program.dontCreateDataInTemporaryFolder) { return; }
