@@ -7,10 +7,11 @@ public class CacheDB: IDisposable
 {
     public SqliteConnection connection;
     private bool _disposed = false;
-
+    private string connectionString = "";
     public CacheDB(string dbPath)
     {
-        connection = new SqliteConnection($"Data Source={dbPath};Mode=ReadWriteCreate");
+        connectionString = $"Data Source={dbPath};Mode=ReadWriteCreate";
+        connection = new SqliteConnection(connectionString);
         connection.Open();
 
         CreateSchema();
@@ -38,13 +39,28 @@ public class CacheDB: IDisposable
         {
             walCommand.CommandText = "PRAGMA journal_mode = WAL;";
             walCommand.ExecuteNonQuery();
-        }   
-        
+        }
+
         using (var timeoutCommand = connection.CreateCommand())
         {
             timeoutCommand.CommandText = "PRAGMA busy_timeout = 5000;"; // 5 seconds
             timeoutCommand.ExecuteNonQuery();
         }
+
+
+        Task.Run(() =>
+        {
+            while (!Program.cts.Token.IsCancellationRequested)
+            {
+                using var conn = new SqliteConnection(connectionString);
+                conn.Open();
+
+                using var cmd = conn.CreateCommand();
+                cmd.CommandText = "PRAGMA wal_checkpoint(TRUNCATE);";
+                cmd.ExecuteNonQuery();
+                Thread.Sleep(30000);
+            }
+        });
 
     }
 

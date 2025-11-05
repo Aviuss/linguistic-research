@@ -53,9 +53,10 @@ public class BookMatrix<T_FieldData>
     {
         if (matrixCellChapterJob == null) { return null; }
 
-        int alreadyCachedResults = ResultsCachedByCache();
+        bool[,,] doneMatrix = new bool[this.bookIDBs.Count, this.bookIDBs.Count, this.chapters.Count];
+        int alreadyCachedResults = ResultsCachedByCache(doneMatrix, 0);
         using var progressBar = InitProgressBar(showProgressBar, MaxNumberOfIterationToPerform() - alreadyCachedResults);
-        CreateParallelStatusTask(progressBar, alreadyCachedResults);
+        CreateParallelStatusTask(progressBar, alreadyCachedResults, doneMatrix);
 
         result_matrix = new decimal[this.bookIDBs.Count, this.bookIDBs.Count];
 
@@ -119,7 +120,8 @@ public class BookMatrix<T_FieldData>
             throw new ArgumentException("Error: Cache not provided");
         }
 
-        int alreadyCachedResults = ResultsCachedByCache();
+        bool[,,] doneMatrix = new bool[this.bookIDBs.Count, this.bookIDBs.Count, this.chapters.Count];
+        int alreadyCachedResults = ResultsCachedByCache(doneMatrix, 0);
         using var progressBar = InitProgressBar(showProgressBar, MaxNumberOfIterationToPerform() - alreadyCachedResults);
 
         int maxProcesses = Environment.ProcessorCount;
@@ -127,7 +129,7 @@ public class BookMatrix<T_FieldData>
 
         var tasks = new List<Task>();
 
-        int size = (int)Math.Ceiling((double)chapters.Count / maxProcesses);
+        int size = 2; //Math.Min(1, (int)Math.Ceiling((double)chapters.Count / maxProcesses));
 
         
         foreach (var item in chapters
@@ -141,23 +143,23 @@ public class BookMatrix<T_FieldData>
             tasks.Add(RunParallelProcess(arguments));
         }
 
-        CreateParallelStatusTask(progressBar, alreadyCachedResults);
+        CreateParallelStatusTask(progressBar, alreadyCachedResults, doneMatrix);
         Task.WaitAll(tasks.ToArray());
 
         CalculateResultMatrix(false);
     }
 
-    private Task CreateParallelStatusTask(ProgressBar? progressBar, int alreadyCached)
+    private Task CreateParallelStatusTask(ProgressBar? progressBar, int alreadyCached, bool[,,] doneMatrix)
     {
         int originalAlreadyCached = alreadyCached;
         return Task.Run(() =>
         {
-            int previousDone = alreadyCached;    
+            int previousDone = alreadyCached;
             
-            while (true)
+            while (!Program.cts.Token.IsCancellationRequested)
             {
-                int nowDone = ResultsCachedByCache();
-        
+                int nowDone = ResultsCachedByCache(doneMatrix, previousDone);
+
 
                 while (previousDone < nowDone)
                 {
@@ -169,22 +171,31 @@ public class BookMatrix<T_FieldData>
                 {
                     break;
                 }
-                Thread.Sleep(5000);
+                Thread.Sleep(30000);
             }
 
         });
     }
-    
+
     private int ResultsCachedByCache()
     {
-        int nowDone = 0;
-        bool[,] doneMatrix = new bool[this.bookIDBs.Count, this.bookIDBs.Count];
+        return ResultsCachedByCache(new bool[this.bookIDBs.Count, this.bookIDBs.Count, this.chapters.Count], 0);
+    }
+
+    private int ResultsCachedByCache(bool[,,] doneMatrix, int previouslyDone)
+    {
+        int nowDone = previouslyDone;
         for (int idx_idb1 = 0; idx_idb1 < bookIDBs.Count; idx_idb1++)
         {
             for (int idx_idb2 = idx_idb1 + 1; idx_idb2 < bookIDBs.Count; idx_idb2++)
             {
                 for (int idx_chapter = 0; idx_chapter < chapters.Count; idx_chapter++)
                 {
+                    if (doneMatrix[idx_idb1, idx_idb2, idx_chapter])
+                    {
+                        continue;
+                    }
+
                     if (cacheDBIDWrapper != null && cacheDBIDWrapper.cacheDB != null)
                     {
                         string? result = cacheDBIDWrapper.cacheDB.TryToGetFromCache(cacheDBIDWrapper.algorithmName, cacheDBIDWrapper.algorithmArgs, bookIDBs[idx_idb1], bookIDBs[idx_idb2], chapters[idx_chapter]);
@@ -193,8 +204,8 @@ public class BookMatrix<T_FieldData>
                             T_FieldData? obj = JsonSerializer.Deserialize<T_FieldData>(result);
                             if (obj != null)
                             {
-                                doneMatrix[idx_idb1, idx_idb2] = true;
-                                doneMatrix[idx_idb2, idx_idb1] = true;
+                                doneMatrix[idx_idb1, idx_idb2, idx_chapter] = true;
+                                doneMatrix[idx_idb2, idx_idb1, idx_chapter] = true;
                                 nowDone++;
                             }
                         }
