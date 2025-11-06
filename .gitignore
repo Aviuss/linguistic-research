@@ -62,3 +62,4 @@ UpgradeLog.htm
 cache.sqlite
 cache.sqlite-shm
 cache.sqlite-wal
+data and results/book database/custom_data.json
