@@ -55,7 +55,7 @@ public class BookMatrix<T_FieldData>
 
         bool[,,] doneMatrix = new bool[this.bookIDBs.Count, this.bookIDBs.Count, this.chapters.Count];
         int alreadyCachedResults = ResultsCachedByCache(doneMatrix, 0);
-        using var progressBar = InitProgressBar(showProgressBar, MaxNumberOfIterationToPerform() - alreadyCachedResults);
+        using var progressBar = InitProgressBar(alreadyCachedResults, showProgressBar);
         CreateParallelStatusTask(progressBar, alreadyCachedResults, doneMatrix);
 
         result_matrix = new decimal[this.bookIDBs.Count, this.bookIDBs.Count];
@@ -122,7 +122,7 @@ public class BookMatrix<T_FieldData>
 
         bool[,,] doneMatrix = new bool[this.bookIDBs.Count, this.bookIDBs.Count, this.chapters.Count];
         int alreadyCachedResults = ResultsCachedByCache(doneMatrix, 0);
-        using var progressBar = InitProgressBar(showProgressBar, MaxNumberOfIterationToPerform() - alreadyCachedResults);
+        using var progressBar = InitProgressBar(alreadyCachedResults, showProgressBar);
 
         int maxProcesses = Environment.ProcessorCount;
 
@@ -159,7 +159,6 @@ public class BookMatrix<T_FieldData>
             while (!Program.cts.Token.IsCancellationRequested)
             {
                 int nowDone = ResultsCachedByCache(doneMatrix, previousDone);
-
 
                 while (previousDone < nowDone)
                 {
@@ -260,16 +259,16 @@ public class BookMatrix<T_FieldData>
         return bookIDBs.Count * (bookIDBs.Count - 1) / 2 * chapters.Count;
     }
 
-    public ProgressBar? InitProgressBar(bool showProgressBar = true, int? customMax = null)
+    public ProgressBar? InitProgressBar(int initialPosition, bool showProgressBar = true)
     {
         if (showProgressBar == false)
         {
             return null;
         }
 
-        int max = customMax ?? MaxNumberOfIterationToPerform();
+        int max = MaxNumberOfIterationToPerform()-initialPosition;
         
-        var progressBar = new ProgressBar() { Maximum = max };
+        var progressBar = new ProgressBar(/*initialPosition: initialPosition, autoStart: true*/) { Maximum = max };
         progressBar.Delay = 333;
 
         progressBar.Text.Description.Clear();
