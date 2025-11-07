@@ -12,8 +12,9 @@ public class Program
 {
     public static readonly string projectPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..");
     public static readonly string dataAndResultsPath = Path.Combine(projectPath, @"data and results");
-    
+
     public static Persistance.Sadownikdb? sadownikdb;
+    public static Persistance.FourPhrasesFromChapterOne? fourPhrasesFromChapterOne;
     public static Persistance.CacheDB? cacheDB;
     public static ConcurrentDictionary<int, string>? mapIdbToName = null;
     public static List<Persistance.LanguageRules>? listOfLanguageRules = null;
@@ -47,6 +48,9 @@ public class Program
 
         sadownikdb = new Persistance.Sadownikdb(
             dbPath: Path.Combine(dataAndResultsPath, "book database/SadownikDB.sqlite")
+        );
+        fourPhrasesFromChapterOne = new Persistance.FourPhrasesFromChapterOne(
+            Path.Combine(dataAndResultsPath, "book database", "custom_data.json")
         );
         mapIdbToName = Persistance.MapIdbToName.ReadFromFile();
         listOfLanguageRules = Persistance.GetLanguageRules.ReadFromFile();
@@ -82,9 +86,9 @@ public class Program
 
 
             var jobFactory = new JobPresents.JobFactory();
-            IJobPreset job = jobFactory.Create("IPARandomChoiceLevenshteinAveragedWithCusomIpaDistancePreset");
+            IJobPreset job = jobFactory.Create("StandardLevenshteinPreset");
             job.bookIDBs = pgwary;
-            job.chapters = new() { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27 };
+            job.chapters = new() /*{ -10 };*/ /*{ 1 };*/ { 1 , 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27 };
             job.getChapterConstruct = sadownikdb;
             job.Start();
         }

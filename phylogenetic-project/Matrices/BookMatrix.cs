@@ -56,7 +56,10 @@ public class BookMatrix<T_FieldData>
         bool[,,] doneMatrix = new bool[this.bookIDBs.Count, this.bookIDBs.Count, this.chapters.Count];
         int alreadyCachedResults = ResultsCachedByCache(doneMatrix, 0);
         using var progressBar = InitProgressBar(alreadyCachedResults, showProgressBar);
-        CreateParallelStatusTask(progressBar, alreadyCachedResults, doneMatrix);
+        if (this.cacheDBIDWrapper != null)
+        {
+            CreateParallelStatusTask(progressBar, alreadyCachedResults, doneMatrix);
+        }
 
         result_matrix = new decimal[this.bookIDBs.Count, this.bookIDBs.Count];
 
@@ -84,6 +87,11 @@ public class BookMatrix<T_FieldData>
                     matrix[idx_idb2, idx_idb1][idx_chapter] = matrix[idx_idb1, idx_idb2][idx_chapter];
 
                     cacheDBIDWrapper?.cacheDB?.InsertCache(cacheDBIDWrapper.algorithmName, cacheDBIDWrapper.algorithmArgs, JsonSerializer.Serialize(matrix[idx_idb1, idx_idb2][idx_chapter]), bookIDBs[idx_idb1], bookIDBs[idx_idb2], chapters[idx_chapter]);
+
+                    if (this.cacheDBIDWrapper == null)
+                    {
+                        progressBar?.PerformStep(1, $"matrixCellChapterJob.Calculate()");
+                    }
                 }
             }
         }
