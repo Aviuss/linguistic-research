@@ -61,8 +61,9 @@ public class CacheDB: IDisposable
                 Thread.Sleep(30000);
             }
         });
-
+    
     }
+
 
     public void InsertCache(string algorithmName, string algorithmArgs, string algorithmResult, int idb1, int idb2, int chapter)
     {

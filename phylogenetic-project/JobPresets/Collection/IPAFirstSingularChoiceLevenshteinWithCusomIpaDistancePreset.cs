@@ -11,10 +11,10 @@ using System.Text.Json;
 
 namespace phylogenetic_project.JobPresets.Collection;
 
-public class IPARandomSingularChoiceLevenshteinWithCusomIpaDistancePreset : IJobPreset
+public class IPAFirstSingularChoiceLevenshteinWithCusomIpaDistancePreset : IJobPreset
 {
 
-    public static string jobId => "IPARandomSingularChoiceLevenshteinWithCusomIpaDistancePreset";
+    public static string jobId => "IPAFirstSingularChoiceLevenshteinWithCusomIpaDistancePreset";
 
     public List<int> bookIDBs { get; set; } = new List<int>();
     public List<int> chapters { get; set; } = new List<int>();
@@ -26,17 +26,15 @@ public class IPARandomSingularChoiceLevenshteinWithCusomIpaDistancePreset : IJob
     {
         ArgumentNullException.ThrowIfNull(getChapterConstruct);
 
-        var algorithmArgs = new
-        {
-            randomSize = 1
-        };
+
 
         ArgumentNullException.ThrowIfNull(Program.ipaLetterDistanceDict);
 
         var levenshteinMatrix = new Matrices.BookMatrix<Matrices.CellChapterJobs.LevenshteinIndividualDataDecimal>(
             bookIDBs_: bookIDBs,
             chapters_: chapters,
-            matrixCellChapterJob_: new Matrices.CellChapterJobs.IPARandomChoiceLevenshteinCellChapterJobWithCustomIpaDistance(getChapterConstruct, algorithmArgs.randomSize, Program.ipaLetterDistanceDict)
+            matrixCellChapterJob_: new Matrices.CellChapterJobs.IPAFirstSingularChoiceLevenshteinCellChapterJobWithCustomIpaDistance(getChapterConstruct, Program.ipaLetterDistanceDict),
+            cacheDBIDWrapper_: new Persistance.CacheDBIDWrapper(Program.cacheDB, jobId, "")
          );
 
         if (Program.doParallelIfPossible)
@@ -46,6 +44,7 @@ public class IPARandomSingularChoiceLevenshteinWithCusomIpaDistancePreset : IJob
         {
             _ = levenshteinMatrix.CalculateResultMatrix(Program.showProgressBar);
         }
+
         Console.WriteLine(levenshteinMatrix.ToString());
 
         if (Program.dontCreateDataInTemporaryFolder) { return; }
@@ -59,7 +58,6 @@ public class IPARandomSingularChoiceLevenshteinWithCusomIpaDistancePreset : IJob
              - chapter text from: {getChapterConstruct.chapterGetterId}
              - bookIDBs: {string.Join(", ", bookIDBs.Select(idb => idb.ToString()))}
              - chapters: {string.Join(", ", chapters.Select(chap => chap.ToString()))}
-             - randomSize: {algorithmArgs.randomSize}
             """)
         });
         

@@ -86,10 +86,10 @@ public class Program
 
 
             var jobFactory = new JobPresents.JobFactory();
-            IJobPreset job = jobFactory.Create("StandardLevenshteinPreset");
+            IJobPreset job = jobFactory.Create("IPARandomChoiceLevenshteinAveragedWithCusomIpaDistancePreset");
             job.bookIDBs = pgwary;
             job.chapters = new() /*{ -10 };*/ /*{ 1 };*/ { 1 , 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27 };
-            job.getChapterConstruct = sadownikdb;
+            job.getChapterConstruct = /*fourPhrasesFromChapterOne;*/ sadownikdb;
             job.Start();
         }
 
