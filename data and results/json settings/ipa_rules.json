@@ -1,6 +1,6 @@
 [
   {
-    "idb_compatible": [27, 29],
+    "idb_compatible": [27, 28, 29],
     "info": "",
     "rules": [
       ["a", ["a"]],
