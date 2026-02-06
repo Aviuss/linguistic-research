@@ -3,7 +3,7 @@
 
 # starting app
 
-make sure you have following files:
+Make sure you have following files:
 - /data and results/book database/SadownikDB.sqlite
 - /data and results/json settings/ipa_rules.json
 - /data and results/json settings/map_idb_to_name.json
