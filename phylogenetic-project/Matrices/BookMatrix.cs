@@ -68,7 +68,6 @@ public class BookMatrix<T_FieldData>
             {
                 for (int idx_chapter = 0; idx_chapter < chapters.Count; idx_chapter++)
                 {
-                    Console.WriteLine(idx_idb1.ToString() + " " + idx_idb2.ToString() + " " + idx_chapter.ToString());
                     if (cacheDBIDWrapper != null && cacheDBIDWrapper.cacheDB != null)
                     {
                         string? result = cacheDBIDWrapper.cacheDB.TryToGetFromCache(
@@ -178,7 +177,7 @@ public class BookMatrix<T_FieldData>
             while (!Program.cts.Token.IsCancellationRequested)
             {
                 int nowDone = ResultsCachedByCache(doneMatrix, previousDone);
-
+                previousDone = nowDone;
                 StaticMethods.ConsoleProgress.Write(
                     nowDone,
                     $"matrixCellChapterJob.Calculate() | CachedAtTheBeginning: {originalAlreadyCached}"
@@ -188,7 +187,7 @@ public class BookMatrix<T_FieldData>
                 {
                     break;
                 }
-                Thread.Sleep(20000);
+                Thread.Sleep(10000);
             }
 
         });

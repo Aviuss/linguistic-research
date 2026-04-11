@@ -29,6 +29,8 @@ static class ConsoleProgress
     {
         ConsoleProgress.last_value = current;
         ConsoleProgress.total = total;
+
+        current -= cached_results;
         
         double pct = (double)(current) / total;
         int filled = (int)(pct * _barWidth);
