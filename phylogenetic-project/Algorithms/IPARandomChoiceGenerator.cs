@@ -41,7 +41,7 @@ public class IPARandomChoiceGenerator
 
         foreach (var comboMem in cartesian)
         {
-            string[] combination = comboMem.Span.ToArray();
+            var combination = comboMem.Span;
             StringBuilder txt1 = new StringBuilder("");
             StringBuilder txt2 = new StringBuilder("");
             int idx_comb = 0;
