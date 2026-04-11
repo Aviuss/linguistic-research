@@ -54,7 +54,7 @@ TestResult.xml
 nunit-*.xml
 
 
-SadownikDB.sqlite
+data and results/book database/SadownikDB.sqlite
 .vs/
 Backup
 data and results/results/
@@ -62,4 +62,4 @@ UpgradeLog.htm
 cache.sqlite
 cache.sqlite-shm
 cache.sqlite-wal
-data and results/book database/custom_data.json
+data and results/book database/four_phrases.json

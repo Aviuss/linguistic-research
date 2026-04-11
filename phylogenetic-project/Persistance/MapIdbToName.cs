@@ -6,13 +6,18 @@ namespace phylogenetic_project.Persistance;
 
 public class MapIdbToName
 {
-    public static ConcurrentDictionary<int, string>? ReadFromFile()
+    public static ConcurrentDictionary<int, string> ReadFromFile()
     {
         string filePath = Path.Combine(Program.dataAndResultsPath, "json settings", "map_idb_to_name.json");
         string json = File.ReadAllText(filePath);
 
         var result = JsonSerializer.Deserialize<ConcurrentDictionary<int, string>>(json);
         
+        if (result == null)
+        {
+            throw new Exception("Couldn't parse map_idb_to_name.json");
+        }
+
         return result;
     }
 }

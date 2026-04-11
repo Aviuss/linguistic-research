@@ -5,7 +5,7 @@ namespace Testing.Algorithms;
 
 public class LevenshteinCustomIpaDistance
 {   
-    phylogenetic_project.Persistance.IpaDistanceProvider ipaDict = new(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..", @"data and results", "json settings", "ipa_letter_distance.csv"));
+    phylogenetic_project.Persistance.IpaDistanceProvider ipaDict = new(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..", "..", "..", "..", @"data and results", "json settings", "ipa_letter_distance.csv"));
 
     [Theory]
     [InlineData("ʊ̃", "k", 1)]

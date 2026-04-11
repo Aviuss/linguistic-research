@@ -5,7 +5,7 @@ namespace phylogenetic_project.Persistance;
 
 public class GetLanguageRules
 {
-    public static List<LanguageRules>? ReadFromFile()
+    public static List<LanguageRules> ReadFromFile()
     {
         string json = File.ReadAllText(Path.Combine(Program.dataAndResultsPath, "json settings", "ipa_rules.json"));
 
@@ -16,6 +16,12 @@ public class GetLanguageRules
         };
 
         List<LanguageRules>? data = JsonSerializer.Deserialize<List<LanguageRules>>(json, options);
+        
+        if (data == null)
+        {
+            throw new Exception("Couldn't parse ipa_rules.json");
+        }
+
         return data;
     }
 }
