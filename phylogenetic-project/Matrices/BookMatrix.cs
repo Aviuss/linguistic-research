@@ -2,7 +2,6 @@ using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.Text.Json;
-using iluvadev.ConsoleProgressBar;
 using Microsoft.VisualBasic;
 using phylogenetic_project.Algorithms;
 using phylogenetic_project.Matrices.CellChapterJobs;
@@ -55,10 +54,10 @@ public class BookMatrix<T_FieldData>
 
         bool[,,] doneMatrix = new bool[this.bookIDBs.Count, this.bookIDBs.Count, this.chapters.Count];
         int alreadyCachedResults = ResultsCachedByCache(doneMatrix, 0);
-        using var progressBar = InitProgressBar(alreadyCachedResults, showProgressBar);
+        InitProgressBar(alreadyCachedResults, showProgressBar);
         if (this.cacheDBIDWrapper != null)
         {
-            CreateParallelStatusTask(progressBar, alreadyCachedResults, doneMatrix);
+            CreateParallelStatusTask(alreadyCachedResults, doneMatrix);
         }
 
         result_matrix = new decimal[this.bookIDBs.Count, this.bookIDBs.Count];
@@ -69,9 +68,14 @@ public class BookMatrix<T_FieldData>
             {
                 for (int idx_chapter = 0; idx_chapter < chapters.Count; idx_chapter++)
                 {
+                    Console.WriteLine(idx_idb1.ToString() + " " + idx_idb2.ToString() + " " + idx_chapter.ToString());
                     if (cacheDBIDWrapper != null && cacheDBIDWrapper.cacheDB != null)
                     {
-                        string? result = cacheDBIDWrapper.cacheDB.TryToGetFromCache(cacheDBIDWrapper.algorithmName, cacheDBIDWrapper.algorithmArgs, bookIDBs[idx_idb1], bookIDBs[idx_idb2], chapters[idx_chapter]);
+                        string? result = cacheDBIDWrapper.cacheDB.TryToGetFromCache(
+                            cacheDBIDWrapper.algorithmName,
+                            cacheDBIDWrapper.algorithmArgs, bookIDBs[idx_idb1], bookIDBs[idx_idb2], chapters[idx_chapter]
+                        );
+
                         if (result != null)
                         {
                             T_FieldData? obj = JsonSerializer.Deserialize<T_FieldData>(result);
@@ -86,11 +90,18 @@ public class BookMatrix<T_FieldData>
                     matrix[idx_idb1, idx_idb2][idx_chapter] = matrixCellChapterJob.Calculate(idx_idb1, idx_idb2, idx_chapter);
                     matrix[idx_idb2, idx_idb1][idx_chapter] = matrix[idx_idb1, idx_idb2][idx_chapter];
 
-                    cacheDBIDWrapper?.cacheDB?.InsertCache(cacheDBIDWrapper.algorithmName, cacheDBIDWrapper.algorithmArgs, JsonSerializer.Serialize(matrix[idx_idb1, idx_idb2][idx_chapter]), bookIDBs[idx_idb1], bookIDBs[idx_idb2], chapters[idx_chapter]);
+                    cacheDBIDWrapper?.cacheDB?.InsertCache(
+                        cacheDBIDWrapper.algorithmName,
+                        cacheDBIDWrapper.algorithmArgs,
+                        JsonSerializer.Serialize(matrix[idx_idb1, idx_idb2][idx_chapter]),
+                        bookIDBs[idx_idb1],
+                        bookIDBs[idx_idb2],
+                        chapters[idx_chapter]
+                    );
 
                     if (this.cacheDBIDWrapper == null)
                     {
-                        progressBar?.PerformStep(1, $"matrixCellChapterJob.Calculate()");
+                        StaticMethods.ConsoleProgress.PerformStep(1, $"matrixCellChapterJob.Calculate()");
                     }
                 }
             }
@@ -112,7 +123,7 @@ public class BookMatrix<T_FieldData>
             }
         }
 
-        if (progressBar != null)
+        if (showProgressBar)
         {
             Console.Write("\n\n\n");
         }
@@ -130,7 +141,7 @@ public class BookMatrix<T_FieldData>
 
         bool[,,] doneMatrix = new bool[this.bookIDBs.Count, this.bookIDBs.Count, this.chapters.Count];
         int alreadyCachedResults = ResultsCachedByCache(doneMatrix, 0);
-        using var progressBar = InitProgressBar(alreadyCachedResults, showProgressBar);
+        InitProgressBar(alreadyCachedResults, showProgressBar);
 
         int maxProcesses = Environment.ProcessorCount;
 
@@ -151,13 +162,13 @@ public class BookMatrix<T_FieldData>
             tasks.Add(RunParallelProcess(arguments));
         }
 
-        CreateParallelStatusTask(progressBar, alreadyCachedResults, doneMatrix);
+        CreateParallelStatusTask(alreadyCachedResults, doneMatrix);
         Task.WaitAll(tasks.ToArray());
 
         CalculateResultMatrix(false);
     }
 
-    private Task CreateParallelStatusTask(ProgressBar? progressBar, int alreadyCached, bool[,,] doneMatrix)
+    private Task CreateParallelStatusTask(int alreadyCached, bool[,,] doneMatrix)
     {
         int originalAlreadyCached = alreadyCached;
         return Task.Run(() =>
@@ -168,17 +179,16 @@ public class BookMatrix<T_FieldData>
             {
                 int nowDone = ResultsCachedByCache(doneMatrix, previousDone);
 
-                while (previousDone < nowDone)
-                {
-                    previousDone++;
-                    progressBar?.PerformStep(1, $"matrixCellChapterJob.Calculate() | CachedAtTheBeginning: {originalAlreadyCached}");
-                }
+                StaticMethods.ConsoleProgress.Write(
+                    nowDone,
+                    $"matrixCellChapterJob.Calculate() | CachedAtTheBeginning: {originalAlreadyCached}"
+                );
 
                 if (nowDone == MaxNumberOfIterationToPerform())
                 {
                     break;
                 }
-                Thread.Sleep(30000);
+                Thread.Sleep(20000);
             }
 
         });
@@ -267,22 +277,17 @@ public class BookMatrix<T_FieldData>
         return bookIDBs.Count * (bookIDBs.Count - 1) / 2 * chapters.Count;
     }
 
-    public ProgressBar? InitProgressBar(int initialPosition, bool showProgressBar = true)
+    public void InitProgressBar(int initialPosition, bool showProgressBar = true)
     {
         if (showProgressBar == false)
         {
-            return null;
+            return;
         }
 
+        StaticMethods.ConsoleProgress.Start();
         int max = MaxNumberOfIterationToPerform()-initialPosition;
-        
-        var progressBar = new ProgressBar(/*initialPosition: initialPosition, autoStart: true*/) { Maximum = max };
-        progressBar.Delay = 333;
-
-        progressBar.Text.Description.Clear();
-        progressBar.Text.Description.Processing.AddNew().SetValue(pb => $"Element: {pb.ElementName}");
-
-        return progressBar;
+        StaticMethods.ConsoleProgress.total = max;
+        StaticMethods.ConsoleProgress.cached_results = initialPosition;
     }
 
     public override string ToString()
