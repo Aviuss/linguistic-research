@@ -10,10 +10,55 @@ Make sure you have following files:
 - /data and results/json settings/ipa_letter_distance.csv
 
 also:
-- dotnet about 8.0 (maybe would work on older)
+- dotnet about 10.0
 - required python libraries (if not provided, the script would generate matrix but crash during tree generation. It is okey, as long as you only need matrix)
 
 launching:
 - cd phylogenetic-project
 - dotnet build
 - dotnet run
+
+# docs
+
+## phylogenetic tree generation
+
+### generating trees using text based levensthein
+
+param: `--job phylogenetic-tree-standard-text`
+
+### generating trees using ipa based levensthein
+
+While generating trees using ipa we can choose the options for it.
+- `--job phylogenetic-tree-ipa-singular-choice`, where in case of ambiguity in ipa rule selection, the first one is chosed
+- `--job phylogenetic-tree-ipa-random-choice`, where random rule selection is done multiple times, and then the result is averaged.
+
+optional parameters:
+- a
+- bc 
+
+### Required params for phylogenetic tree generation
+
+#### `--input-type`
+
+param: `--input-type sql`
+
+param: `--input-type json`
+
+Both input types must have specific interface (TODO). 
+
+#### `--input-type-path`
+
+param: `--input-type-path [path]`
+
+#### `--book-idbs`
+
+param e.g.: `--book-idbs 28,29,36,38,46,37,44,39,43,33,42`
+
+#### `--chapters`
+
+param e.g.: `--chapters 1,2,3`
+
+# code docs
+
+## phylogenetic tree generation
+

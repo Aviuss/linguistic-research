@@ -29,15 +29,19 @@ public class Program
 
     public static IpaDistanceProvider? ipaLetterDistanceDict;
 
+    public static ConfigSingelton config = ConfigSingelton.Instance;
+
     static void Main(string[] args)
     {
+        config.PassArgs(args);
+
         RegisterShutdownHandlers();
         LoadDataAndConfigAndCache();
 
         Console.WriteLine("Welcome to phylogenetic project, where research paper is being created in the Poznan University of Technology!");
 
 
-        if (args.Length == 4)
+        /*if (args.Length == 4)
         {
             string jobId = args[0].Trim();
             List<int> bookIdbs = args[1].Split(",").Select(el => int.Parse(el)).ToList();
@@ -62,16 +66,16 @@ public class Program
 
 
             var jobFactory = new JobPresents.JobFactory();
-            IJobPreset job = jobFactory.Create("StandardLevenshteinPreset");
+            IJobPreset job = jobFactory.Create("IPARandomChoiceLevenshteinAveragedWithCusomIpaDistancePreset");
             job.bookIDBs = pgwary;
-            job.chapters = new() /*{ -10 };*/ /*{ 1 };*/ { 1 , 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27 };
-            job.getChapterConstruct = /*fourPhrasesFromChapterOne;*/ sadownikdb;
+            job.chapters = new()  { 1 , 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27 };
+            job.getChapterConstruct = //fourPhrasesFromChapterOne sadownikdb;
             job.Start();
         }
 
 
         cacheDB?.Dispose();
-        sadownikdb?.Dispose();
+        sadownikdb?.Dispose();*/
         Console.WriteLine("Program finished running.");
     }
 

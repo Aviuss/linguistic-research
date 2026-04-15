@@ -12,13 +12,18 @@ namespace phylogenetic_project.JobPresets.Collection;
 
 public class StandardLevenshtein : IJobPreset
 {
-    public static string jobId => "StandardLevenshteinPreset";
-
-    public List<int> bookIDBs { get; set; } = new List<int>();
-    public List<int> chapters { get; set; } = new List<int>();
-    public IGetChapter getChapterConstruct { get; set; } = null!;
+    public List<int> bookIDBs = null!;
+    public List<int> chapters = null!;
+    public IGetChapter getChapterConstruct  = null!;
 
     private string timeNow = DateTime.UtcNow.ToString("yyyy.MM.dd_HHmmss");
+
+    public StandardLevenshtein(IGetChapter getChapterConstruct, List<int> chapters, List<int> bookIDBs)
+    {
+        this.getChapterConstruct = getChapterConstruct;
+        this.chapters = chapters;
+        this.bookIDBs = bookIDBs;
+    }
 
     public void Start()
     {
@@ -39,7 +44,7 @@ public class StandardLevenshtein : IJobPreset
         {
             ("matrix.txt", levenshteinMatrix.ToString(-1)),
             ("config.txt", $"""
-            Algorithm used: {jobId}
+            Algorithm used: {"..."}
             
              - chapter text from: {getChapterConstruct.chapterGetterId}
              - bookIDBs: {string.Join(", ", bookIDBs.Select(idb => idb.ToString()))}

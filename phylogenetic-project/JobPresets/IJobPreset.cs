@@ -10,9 +10,4 @@ namespace phylogenetic_project.JobPresents;
 public interface IJobPreset
 {   
     public void Start();
-    public static abstract string jobId { get; }
-    public List<int> bookIDBs { get; set; }
-    public List<int> chapters { get; set; }
-    IGetChapter getChapterConstruct { get; set; }
-
 }
