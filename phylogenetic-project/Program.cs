@@ -33,6 +33,14 @@ public class Program
 
     static void Main(string[] args)
     {
+        if (args.Length == 0)
+        {
+            Console.WriteLine($"Current Working Directory: \"{Directory.GetCurrentDirectory()}\"");
+            Console.WriteLine("DEVELOPMENT ARGS INJECTION");
+            args = "--job phylogenetic-tree-standard-text --input-type sql --input-type-path ../../../SadownikDB.sqlite".Split(" ");
+        }
+
+        Console.WriteLine(args);
         config.PassArgs(args);
 
         RegisterShutdownHandlers();
@@ -96,14 +104,7 @@ public class Program
     }
 
     static void LoadDataAndConfigAndCache()
-    {
-        sadownikdb = new Persistance.Sadownikdb(
-            dbPath: Path.Combine(dataAndResultsPath, "book database/SadownikDB.sqlite")
-        );
-        
-        fourPhrasesFromChapterOne = new Persistance.FourPhrasesFromChapterOne(
-            Path.Combine(dataAndResultsPath, "book database", "four_phrases.json")
-        );
+    {        
 
         mapIdbToName = Persistance.MapIdbToName.ReadFromFile();
         listOfLanguageRules = Persistance.GetLanguageRules.ReadFromFile();
