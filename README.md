@@ -56,7 +56,13 @@ param e.g.: `--book-idbs 28,29,36,38,46,37,44,39,43,33,42`
 
 param e.g.: `--chapters 1,2,3`
 
-### 3.5. `--output-folder-path [path]`
+#### 3.5. `--output-folder-path [path]`
+
+### 4. Optional params for phylogenetic tree generation
+
+#### 4.1 `--no-python`
+
+C# code executes some python scripts to generate graphs and some python implemented algorithms. If not set up properly, may cause issues.
 
 # code docs
 

@@ -8,9 +8,13 @@ namespace phylogenetic_project;
 public sealed class ConfigSingelton
 {
     public string[] args = [];
+    public string outputFolderPath = null!;
+    public bool noPython = false;
     public IGetChapter? inputStruct = null;
     public IJobPreset? jobPreset = null;
-
+    public List<int>? bookIdbs = null;
+    public List<int>? chapters = null;
+    
     private string? job = null;
     private string? inputTypePath = null;
     private string? inputType = null;
@@ -32,6 +36,10 @@ public sealed class ConfigSingelton
                 .RequiresOption<string>("job", "Job which script needs to perform")
                 .RequiresOption<string>("input-type", "Type of input for IGetChapter")
                 .RequiresOption<string>("input-type-path", "Path of input for IGetChapter")
+                .RequiresOption<string>("output-folder-path", "Path of Program's output")
+                .RequiresOption<string>("book-idbs", "Idb's of books to analyze from input")
+                .RequiresOption<string>("chapters", "Chapters of books to analyze from input")
+                .SupportsFlag("no-python", "Disables python scripts")
                 .Parse();
             
             if (parser.HasErrors)
@@ -43,13 +51,20 @@ public sealed class ConfigSingelton
             instance.job = parser.GetOption<string>("job");
             instance.inputType = parser.GetOption<string>("input-type");
             instance.inputTypePath = parser.GetOption<string>("input-type-path");
-            
-            instance.loadInputType();
-            instance.loadJobPreset();
+            instance.outputFolderPath = parser.GetOption<string>("output-folder-path");
+            ArgumentNullException.ThrowIfNull(instance.outputFolderPath);
+            Directory.CreateDirectory(instance.outputFolderPath);
+
+            instance.bookIdbs = parser.GetOption<string>("book-idbs").Split(",").Select(x => Int32.Parse(x)).ToList();
+            instance.chapters = parser.GetOption<string>("chapters").Split(",").Select(x => Int32.Parse(x)).ToList();
+            instance.noPython = !parser.IsFlagProvided("no-python");
+
+            instance.LoadInputType();
+            instance.LoadJobPreset();
         }
     }
 
-    private void loadInputType()
+    private void LoadInputType()
     {
         ArgumentNullException.ThrowIfNull(this.inputType);
         ArgumentNullException.ThrowIfNull(this.inputTypePath);
@@ -70,17 +85,22 @@ public sealed class ConfigSingelton
         throw new Exception("wrong inputType type. Can be only \"sql\" or \"json\" ");
     }
 
-    private void loadJobPreset()
+    private void LoadJobPreset()
     {
         ArgumentNullException.ThrowIfNull(this.inputStruct);
+        ArgumentNullException.ThrowIfNull(this.chapters);
+        ArgumentNullException.ThrowIfNull(this.bookIdbs);
 
-
+        string timeNow = DateTime.UtcNow.ToString("yyyy.MM.dd_HHmmss");
+        
         if (job == "phylogenetic-tree-standard-text")
         {
             this.jobPreset = new phylogenetic_project.JobPresets.Collection.StandardLevenshtein(
                 this.inputStruct,
-                null!,
-                null!
+                this.chapters,
+                this.bookIdbs,
+                Path.Combine(this.outputFolderPath, "results", "phylogenetic-tree-standard-text", timeNow),
+                this.noPython
             );
         }
 

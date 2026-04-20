@@ -42,15 +42,19 @@ public class Program
                 
                 --input-type sql
                 --input-type-path ../../../../input_data/SadownikDB.sqlite
-                
-                ".Split(" ");
+
+                --output-folder-path ../../../../output_data/
+
+                --book-idbs 28,29,36,38,46,37,44,39,43,33,42
+                --chapters 1,2,3
+                ".Split(" ").Select(x => x.Trim()).Where(x => x.Length > 0).ToArray();
         }
 
         Console.WriteLine(args);
         config.PassArgs(args);
 
         RegisterShutdownHandlers();
-        LoadDataAndConfigAndCache();
+        //LoadDataAndConfigAndCache();
 
         Console.WriteLine("Welcome to phylogenetic project, where research paper is being created in the Poznan University of Technology!");
 
