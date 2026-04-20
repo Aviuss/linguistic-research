@@ -37,7 +37,13 @@ public class Program
         {
             Console.WriteLine($"Current Working Directory: \"{Directory.GetCurrentDirectory()}\"");
             Console.WriteLine("DEVELOPMENT ARGS INJECTION");
-            args = "--job phylogenetic-tree-standard-text --input-type sql --input-type-path ../../../SadownikDB.sqlite".Split(" ");
+            args = @"
+                --job phylogenetic-tree-standard-text
+                
+                --input-type sql
+                --input-type-path ../../../../input_data/SadownikDB.sqlite
+                
+                ".Split(" ");
         }
 
         Console.WriteLine(args);
@@ -48,6 +54,13 @@ public class Program
 
         Console.WriteLine("Welcome to phylogenetic project, where research paper is being created in the Poznan University of Technology!");
 
+        if (config.jobPreset == null)
+        {
+            Console.WriteLine("Error: could not create given job :(");
+            return;
+        }
+
+        config.jobPreset.Start();
 
         /*if (args.Length == 4)
         {

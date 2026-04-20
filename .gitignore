@@ -54,12 +54,11 @@ TestResult.xml
 nunit-*.xml
 
 
-data and results/book database/SadownikDB.sqlite
+input_data/SadownikDB.sqlite
+input_data/four_phrases.json
+
+output_data/cache.sqlite
+output_data/cache.sqlite-shm
+output_data/cache.sqlite-wal
+
 .vs/
-Backup
-data and results/results/
-UpgradeLog.htm
-cache.sqlite
-cache.sqlite-shm
-cache.sqlite-wal
-data and results/book database/four_phrases.json

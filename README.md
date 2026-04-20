@@ -22,11 +22,11 @@ launching:
 
 ## phylogenetic tree generation
 
-### generating trees using text based levensthein
+### 1. Generating trees using text based levensthein
 
 param: `--job phylogenetic-tree-standard-text`
 
-### generating trees using ipa based levensthein
+### 2. Generating trees using ipa based levensthein
 
 While generating trees using ipa we can choose the options for it.
 - `--job phylogenetic-tree-ipa-singular-choice`, where in case of ambiguity in ipa rule selection, the first one is chosed
@@ -36,9 +36,9 @@ optional parameters:
 - a
 - bc 
 
-### Required params for phylogenetic tree generation
+### 3. Required params for phylogenetic tree generation
 
-#### `--input-type`
+#### 3.1. `--input-type`
 
 param: `--input-type sql`
 
@@ -46,17 +46,17 @@ param: `--input-type json`
 
 Both input types must have specific interface (TODO). 
 
-#### `--input-type-path`
+#### 3.2. `--input-type-path [path]`
 
-param: `--input-type-path [path]`
-
-#### `--book-idbs`
+#### 3.3. `--book-idbs [...]`
 
 param e.g.: `--book-idbs 28,29,36,38,46,37,44,39,43,33,42`
 
-#### `--chapters`
+#### 3.4. `--chapters [...]`
 
 param e.g.: `--chapters 1,2,3`
+
+### 3.5. `--output-folder-path [path]`
 
 # code docs
 
