@@ -42,6 +42,7 @@ public class Program
                 
                 --input-type sql
                 --input-type-path ../../../../input_data/SadownikDB.sqlite
+                --input-type-id sadownikdb
 
                 --output-folder-path ../../../../output_data/
 

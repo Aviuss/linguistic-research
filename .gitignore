@@ -56,6 +56,7 @@ nunit-*.xml
 
 input_data/SadownikDB.sqlite
 input_data/four_phrases.json
+input_data/chapter_16_sentence_maching.json
 
 output_data/cache/cache.sqlite
 output_data/cache/cache.sqlite-shm

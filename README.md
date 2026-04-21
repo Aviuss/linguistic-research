@@ -48,15 +48,19 @@ Both input types must have specific interface (TODO).
 
 #### 3.2. `--input-type-path [path]`
 
-#### 3.3. `--book-idbs [...]`
+#### 3.3. `--input-type-id [id]`
+
+Identifier must be provided to distinguish data source from each other. It is needed for caching and logging. It exists because different system path may exist for the same data resource, so it is unfeasible to identify resource by path.
+
+#### 3.4. `--book-idbs [...]`
 
 param e.g.: `--book-idbs 28,29,36,38,46,37,44,39,43,33,42`
 
-#### 3.4. `--chapters [...]`
+#### 3.5. `--chapters [...]`
 
 param e.g.: `--chapters 1,2,3`
 
-#### 3.5. `--output-folder-path [path]`
+#### 3.6. `--output-folder-path [path]`
 
 ### 4. Optional params for phylogenetic tree generation
 

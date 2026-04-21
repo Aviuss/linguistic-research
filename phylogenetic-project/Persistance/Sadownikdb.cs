@@ -5,17 +5,21 @@ namespace phylogenetic_project.Persistance;
 
 public class Sadownikdb: IDisposable, IGetChapter
 {
-    public string chapterGetterId => "Sadownikdb";
+    public string resourceId => _resourceId;
+    private string _resourceId = null!;
 
 
-    public SqliteConnection connection;
+    private SqliteConnection connection;
     private bool _disposed = false;
 
-    public List<int> BookIDBs = new List<int>();
-    public List<int> Chapters = new List<int>();
+    private List<int> BookIDBs = [];
+    private List<int> Chapters = [];
+    
 
-    public Sadownikdb(string dbPath)
+    public Sadownikdb(string dbPath, string resourceId)
     {
+        this._resourceId = resourceId;
+
         if (!File.Exists(dbPath))
             throw new FileNotFoundException("Database file not found!", dbPath);
 

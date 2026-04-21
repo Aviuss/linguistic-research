@@ -42,7 +42,7 @@ public class IPAFirstSingularChoiceLevenshtein : IJobPreset
             ("config.txt", $"""
             Algorithm used: {jobId}
             
-             - chapter text from: {getChapterConstruct.chapterGetterId}
+             - chapter text from: {getChapterConstruct.resourceId}
              - bookIDBs: {string.Join(", ", bookIDBs.Select(idb => idb.ToString()))}
              - chapters: {string.Join(", ", chapters.Select(chap => chap.ToString()))}
             """)

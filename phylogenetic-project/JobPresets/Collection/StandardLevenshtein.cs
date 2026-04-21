@@ -50,9 +50,9 @@ public class StandardLevenshtein : IJobPreset
             [
                 ("matrix.txt", levenshteinMatrix.ToString(-1)),
                 ("config.txt", $"""
-                Algorithm used: {"..."}
+                --job phylogenetic-tree-standard-text
                 
-                - chapter text from: {getChapterConstruct.chapterGetterId}
+                - text source: {getChapterConstruct.resourceId}
                 - bookIDBs: {string.Join(", ", bookIDBs.Select(idb => idb.ToString()))}
                 - chapters: {string.Join(", ", chapters.Select(chap => chap.ToString()))}
                 """)
