@@ -52,9 +52,9 @@ public class StandardLevenshtein : IJobPreset
                 ("config.txt", $"""
                 --job phylogenetic-tree-standard-text
                 
-                - text source: {getChapterConstruct.resourceId}
-                - bookIDBs: {string.Join(", ", bookIDBs.Select(idb => idb.ToString()))}
-                - chapters: {string.Join(", ", chapters.Select(chap => chap.ToString()))}
+                --input-type-id {getChapterConstruct.resourceId}
+                --book-idbs {string.Join(", ", bookIDBs.Select(idb => idb.ToString()))}
+                --chapters {string.Join(", ", chapters.Select(chap => chap.ToString()))}
                 """)
             ]
         );

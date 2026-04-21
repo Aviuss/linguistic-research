@@ -90,7 +90,7 @@ public class Program
     static void LoadDataAndConfigAndCache()
     {        
 
-        mapIdbToName = Persistance.MapIdbToName.ReadFromFile();
+        //mapIdbToName = Persistance.MapIdbToName.ReadFromFile();
         listOfLanguageRules = Persistance.GetLanguageRules.ReadFromFile();
 
         cacheDB = new Persistance.CacheDB(

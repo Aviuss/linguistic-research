@@ -33,8 +33,7 @@ While generating trees using ipa we can choose the options for it.
 - `--job phylogenetic-tree-ipa-random-choice`, where random rule selection is done multiple times, and then the result is averaged.
 
 optional parameters:
-- a
-- bc 
+- `--custom-ipa-distance [path]`
 
 ### 3. Required params for phylogenetic tree generation
 
@@ -65,6 +64,10 @@ param e.g.: `--chapters 1,2,3`
 ### 4. Optional params for phylogenetic tree generation
 
 #### 4.1 `--no-python`
+
+#### 4.2 `--map-idb-to-name [path]`
+
+Maps `idb`s to more human readable names.
 
 C# code executes some python scripts to generate graphs and some python implemented algorithms. If not set up properly, may cause issues.
 
