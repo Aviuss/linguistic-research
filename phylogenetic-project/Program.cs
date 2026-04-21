@@ -66,41 +66,7 @@ public class Program
 
         config.jobPreset.Start();
 
-        /*if (args.Length == 4)
-        {
-            string jobId = args[0].Trim();
-            List<int> bookIdbs = args[1].Split(",").Select(el => int.Parse(el)).ToList();
-            List<int> chapters = args[2].Split(",").Select(el => int.Parse(el)).ToList();
-            dontCreateDataInTemporaryFolder = args[3] == "true";
-
-            var jobFactory = new JobPresents.JobFactory();
-            IJobPreset job = jobFactory.Create(jobId);
-            job.bookIDBs = bookIdbs;
-            job.chapters = chapters;
-            job.getChapterConstruct = sadownikdb;
-            job.Start();
-        }
-
-        if (args.Length == 0)
-        {
-            doParallelIfPossible = true;
-            showProgressBar = true;
-
-            List<int> pgwary = new List<int>() { 28, 29, 36, 38, 46, 37, 44, 39, 43, 33, 42 };
-            pgwary.Sort();
-
-
-            var jobFactory = new JobPresents.JobFactory();
-            IJobPreset job = jobFactory.Create("IPARandomChoiceLevenshteinAveragedWithCusomIpaDistancePreset");
-            job.bookIDBs = pgwary;
-            job.chapters = new()  { 1 , 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27 };
-            job.getChapterConstruct = //fourPhrasesFromChapterOne sadownikdb;
-            job.Start();
-        }
-
-
-        cacheDB?.Dispose();
-        sadownikdb?.Dispose();*/
+        config.Dispose();
         Console.WriteLine("Program finished running.");
     }
 

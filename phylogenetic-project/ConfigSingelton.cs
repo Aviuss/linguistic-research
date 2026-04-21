@@ -20,9 +20,9 @@ public sealed class ConfigSingelton
     private string? inputType = null;
 
     private static ConfigSingelton instance = null!;
-    private static object creationLock = new object();
-    private static object passArgsLock = new object();
-
+    private static object creationLock = new();
+    private static object passArgsLock = new();
+    private List<IDisposable> disposables = [];
     private ConfigSingelton() {}
 
     public void PassArgs(string[] args)
@@ -71,9 +71,12 @@ public sealed class ConfigSingelton
 
         if (this.inputType == "sql")
         {
-            this.inputStruct = new Persistance.Sadownikdb(
+            Sadownikdb sadownik = new(
                 dbPath: this.inputTypePath
             );
+
+            this.disposables.Add(sadownik);
+            this.inputStruct = sadownik;
             return;
         } else if (this.inputType == "json") {
             this.inputStruct = new Persistance.FourPhrasesFromChapterOne(
@@ -104,7 +107,15 @@ public sealed class ConfigSingelton
             );
         }
 
-   }
+    }
+
+    public void Dispose()
+    {
+        foreach (IDisposable item in this.disposables)
+        {
+            item.Dispose();
+        }
+    }
 
     public static ConfigSingelton Instance
     {
