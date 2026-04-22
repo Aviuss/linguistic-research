@@ -48,6 +48,7 @@ public class Program
 
                 --book-idbs 28,29,36,38,46,37,44,39,43,33,42
                 --chapters 1,2,3
+                --map-idb-to-name ../../../../input_data/map_idb_to_name.json
                 ".Split(" ").Select(x => x.Trim()).Where(x => x.Length > 0).ToArray();
         }
 

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Text.Json;
+using System.Collections.Concurrent;
 
 
 namespace phylogenetic_project.JobPresets.Collection;
@@ -17,13 +18,15 @@ public class StandardLevenshtein : IJobPreset
     private IGetChapter getChapterConstruct = null!;
     private string outputResultPath = null!;
     private bool noPython = false;
+    private IDictionary<int, string>? mapIdbToName = null;
 
     public StandardLevenshtein(
         IGetChapter getChapterConstruct,
         List<int> chapters,
         List<int> bookIDBs,
         string outputResultPath,
-        bool noPython = false
+        bool noPython = false,
+        IDictionary<int, string>? mapIdbToName = null
     )
     {
         this.getChapterConstruct = getChapterConstruct;
@@ -31,6 +34,7 @@ public class StandardLevenshtein : IJobPreset
         this.bookIDBs = bookIDBs;
         this.outputResultPath = outputResultPath;
         this.noPython = noPython;
+        this.mapIdbToName = mapIdbToName;
     }
 
     public void Start()
@@ -50,11 +54,11 @@ public class StandardLevenshtein : IJobPreset
             [
                 ("matrix.txt", levenshteinMatrix.ToString(-1)),
                 ("config.txt", $"""
-                --job phylogenetic-tree-standard-text
+                job: phylogenetic-tree-standard-text
                 
-                --input-type-id {getChapterConstruct.resourceId}
-                --book-idbs {string.Join(", ", bookIDBs.Select(idb => idb.ToString()))}
-                --chapters {string.Join(", ", chapters.Select(chap => chap.ToString()))}
+                input-type-id: {getChapterConstruct.resourceId}
+                book-idbs: {string.Join(", ", bookIDBs.Select(idb => idb.ToString()))}
+                chapters: {string.Join(", ", chapters.Select(chap => chap.ToString()))}
                 """)
             ]
         );
@@ -65,7 +69,7 @@ public class StandardLevenshtein : IJobPreset
             inputmatrix = levenshteinMatrix.ConvertResultToLowerTriangularMatrix(),
             names = bookIDBs.Select(element =>
             {
-                if (Program.mapIdbToName != null && Program.mapIdbToName.TryGetValue(element, out string? value))
+                if (this.mapIdbToName != null && this.mapIdbToName.TryGetValue(element, out string? value))
                 {
                     if (value != null)
                     {

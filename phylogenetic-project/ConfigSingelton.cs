@@ -64,7 +64,9 @@ public sealed class ConfigSingelton
             Directory.CreateDirectory(instance.outputFolderPath);
 
             instance.bookIdbs = parser.GetOption<string>("book-idbs").Split(",").Select(x => Int32.Parse(x)).ToList();
+            instance.bookIdbs.Sort();
             instance.chapters = parser.GetOption<string>("chapters").Split(",").Select(x => Int32.Parse(x)).ToList();
+            instance.chapters.Sort();
             instance.noPython = !parser.IsFlagProvided("no-python");
             instance.customIpaDistancePath = parser.GetOption<string>("custom-ipa-distance");
             
