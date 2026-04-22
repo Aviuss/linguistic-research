@@ -7,7 +7,7 @@ namespace phylogenetic_project.Algorithms;
 public class LevenshteinIPARandomChoiceAveragedWithCustomIpaDistanceInParallel
 {
     public static LevenshteinIndividualDataDecimal Calculate
-        (List<string[]> inputText1, List<string[]> inputText2, Persistance.IpaDistanceProvider ipaLetterDistanceDict, long randomSize = 10000)
+        (List<string[]> inputText1, List<string[]> inputText2, Persistance.IpaLetterDistance ipaLetterDistanceDict, long randomSize = 10000)
     {
         decimal avgLevenshteinDistance = 0;
         long avgMaxDistance = 0;
@@ -21,7 +21,7 @@ public class LevenshteinIPARandomChoiceAveragedWithCustomIpaDistanceInParallel
         int count = 0;
         Parallel.ForEach(
             enumerator,
-            new ParallelOptions { MaxDegreeOfParallelism = (int)Math.Ceiling(Environment.ProcessorCount * 1.5) },
+            new ParallelOptions { MaxDegreeOfParallelism = 2 },
             listOfStringsPair =>
             {
                 foreach (var (txt1String, txt2String) in listOfStringsPair)

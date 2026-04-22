@@ -1,4 +1,4 @@
-using phylogenetic_project.JobPresents;
+using phylogenetic_project.JobPresets;
 using phylogenetic_project.Persistance;
 using System;
 using System.Collections.Generic;
@@ -45,7 +45,7 @@ public class IPARandomSingularChoiceLevenshteinPreset : IJobPreset
             ("config.txt", $"""
             Algorithm used: {jobId}
             
-             - chapter text from: {getChapterConstruct.chapterGetterId}
+             - chapter text from: {getChapterConstruct.resourceId}
              - bookIDBs: {string.Join(", ", bookIDBs.Select(idb => idb.ToString()))}
              - chapters: {string.Join(", ", chapters.Select(chap => chap.ToString()))}
             """)
@@ -53,7 +53,7 @@ public class IPARandomSingularChoiceLevenshteinPreset : IJobPreset
         
         var pyDataNewick = new
         {
-            save_path_newick = Path.Combine(StaticMethods.SaveTemporaryResults.TemporaryFolderPath(timeNow), "newick.txt"),
+            save_path_newick = Path.Combine("StaticMethods.SaveTemporaryResults.TemporaryFolderPath(timeNow)", "newick.txt"),
             inputmatrix = levenshteinMatrix.ConvertResultToLowerTriangularMatrix(),
             names = bookIDBs.Select(element =>
             {
@@ -75,8 +75,8 @@ public class IPARandomSingularChoiceLevenshteinPreset : IJobPreset
         
         var pyDataGraph = new
         {
-            save_path_graph = Path.Combine(StaticMethods.SaveTemporaryResults.TemporaryFolderPath(timeNow), "graph.png"),
-            newickFormat = File.ReadAllText(Path.Combine(StaticMethods.SaveTemporaryResults.TemporaryFolderPath(timeNow), "newick.txt"))
+            save_path_graph = Path.Combine("StaticMethods.SaveTemporaryResults.TemporaryFolderPath(timeNow)", "graph.png"),
+            newickFormat = File.ReadAllText(Path.Combine("StaticMethods.SaveTemporaryResults.TemporaryFolderPath(timeNow)", "newick.txt"))
         };
         StaticMethods.Python.CallPythonScript(
             "create_linguistic_trees.py",    

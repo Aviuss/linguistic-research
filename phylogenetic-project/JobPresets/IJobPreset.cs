@@ -5,14 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace phylogenetic_project.JobPresents;
+namespace phylogenetic_project.JobPresets;
 
 public interface IJobPreset
 {   
     public void Start();
-    public static abstract string jobId { get; }
-    public List<int> bookIDBs { get; set; }
-    public List<int> chapters { get; set; }
-    IGetChapter getChapterConstruct { get; set; }
-
 }

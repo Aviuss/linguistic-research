@@ -10,5 +10,5 @@ public interface IGetChapter
 {
     public string GetChapter(int bookIDB, int chapterNo);
 
-    public string chapterGetterId { get; }
+    public string resourceId { get; }
 }

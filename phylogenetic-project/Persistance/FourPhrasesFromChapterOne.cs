@@ -9,11 +9,14 @@ namespace phylogenetic_project.Persistance;
 
 public class FourPhrasesFromChapterOne : IGetChapter
 {
-    public string chapterGetterId { get; } = "FourPhrasesFromChapterOne";
+    public string resourceId => _resourceId;
+    private string _resourceId = null!;
+    
     private ConcurrentDictionary<(int, int), string> dictionary = new();
 
-    public FourPhrasesFromChapterOne(string dataPath)
+    public FourPhrasesFromChapterOne(string dataPath, string resourceId)
     {
+        this._resourceId = resourceId;
         string json = File.ReadAllText(dataPath);
 
         List<ChapterCustomDataTextEntry> entries = JsonSerializer.Deserialize<List<ChapterCustomDataTextEntry>>(json)

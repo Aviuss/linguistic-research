@@ -1,5 +1,5 @@
 ﻿
-namespace phylogenetic_project.JobPresents;
+namespace phylogenetic_project.JobPresets;
 
 public class JobFactory
 {

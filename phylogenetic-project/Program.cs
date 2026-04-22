@@ -1,4 +1,4 @@
-﻿using phylogenetic_project.JobPresents;
+﻿using phylogenetic_project.JobPresets;
 using phylogenetic_project.Persistance;
 using phylogenetic_project.StaticMethods;
 using System;
@@ -27,51 +27,49 @@ public class Program
     public static CancellationTokenSource cts = new();
     public static bool dontCreateDataInTemporaryFolder = false;
 
-    public static IpaDistanceProvider? ipaLetterDistanceDict;
+    public static IpaLetterDistance? ipaLetterDistanceDict;
+
+    public static ConfigSingelton config = ConfigSingelton.Instance;
 
     static void Main(string[] args)
     {
+        if (args.Length == 0)
+        {
+            Console.WriteLine($"Current Working Directory: \"{Directory.GetCurrentDirectory()}\"");
+            Console.WriteLine("DEVELOPMENT ARGS INJECTION");
+            args = @"
+                --job phylogenetic-tree-ipa-singular-choice
+                
+                --input-type sql
+                --input-type-path ../../../../input_data/SadownikDB.sqlite
+                --input-type-id sadownikdb
+
+                --output-folder-path ../../../../output_data/
+
+                --book-idbs 28,29,38
+                --chapters 2,3,4
+                --map-idb-to-name ../../../../input_data/map_idb_to_name.json
+                --ipa-rules ../../../../input_data/ipa_rules.json
+                ".Split(" ").Select(x => x.Trim()).Where(x => x.Length > 0).ToArray();
+        }
+
+        Console.WriteLine(args);
+        config.PassArgs(args);
+
         RegisterShutdownHandlers();
-        LoadDataAndConfigAndCache();
+        //LoadDataAndConfigAndCache();
 
         Console.WriteLine("Welcome to phylogenetic project, where research paper is being created in the Poznan University of Technology!");
 
-
-        if (args.Length == 4)
+        if (config.jobPreset == null)
         {
-            string jobId = args[0].Trim();
-            List<int> bookIdbs = args[1].Split(",").Select(el => int.Parse(el)).ToList();
-            List<int> chapters = args[2].Split(",").Select(el => int.Parse(el)).ToList();
-            dontCreateDataInTemporaryFolder = args[3] == "true";
-
-            var jobFactory = new JobPresents.JobFactory();
-            IJobPreset job = jobFactory.Create(jobId);
-            job.bookIDBs = bookIdbs;
-            job.chapters = chapters;
-            job.getChapterConstruct = sadownikdb;
-            job.Start();
+            Console.WriteLine("Error: could not create given job :(");
+            return;
         }
 
-        if (args.Length == 0)
-        {
-            doParallelIfPossible = true;
-            showProgressBar = true;
+        config.jobPreset.Start();
 
-            List<int> pgwary = new List<int>() { 28, 29, 36, 38, 46, 37, 44, 39, 43, 33, 42 };
-            pgwary.Sort();
-
-
-            var jobFactory = new JobPresents.JobFactory();
-            IJobPreset job = jobFactory.Create("StandardLevenshteinPreset");
-            job.bookIDBs = pgwary;
-            job.chapters = new() /*{ -10 };*/ /*{ 1 };*/ { 1 , 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27 };
-            job.getChapterConstruct = /*fourPhrasesFromChapterOne;*/ sadownikdb;
-            job.Start();
-        }
-
-
-        cacheDB?.Dispose();
-        sadownikdb?.Dispose();
+        config.Dispose();
         Console.WriteLine("Program finished running.");
     }
 
@@ -92,23 +90,16 @@ public class Program
     }
 
     static void LoadDataAndConfigAndCache()
-    {
-        sadownikdb = new Persistance.Sadownikdb(
-            dbPath: Path.Combine(dataAndResultsPath, "book database/SadownikDB.sqlite")
-        );
-        
-        fourPhrasesFromChapterOne = new Persistance.FourPhrasesFromChapterOne(
-            Path.Combine(dataAndResultsPath, "book database", "four_phrases.json")
-        );
+    {        
 
-        mapIdbToName = Persistance.MapIdbToName.ReadFromFile();
-        listOfLanguageRules = Persistance.GetLanguageRules.ReadFromFile();
+        //mapIdbToName = Persistance.MapIdbToName.ReadFromFile();
+        //listOfLanguageRules = Persistance.GetLanguageRules.ReadFromFile();
 
         cacheDB = new Persistance.CacheDB(
             dbPath: Path.Combine(dataAndResultsPath, "cache/cache.sqlite")
         );
 
-        ipaLetterDistanceDict = new Persistance.IpaDistanceProvider(Path.Combine(dataAndResultsPath, "json settings", "ipa_letter_distance.csv"));
+        ipaLetterDistanceDict = new Persistance.IpaLetterDistance(Path.Combine(dataAndResultsPath, "json settings", "ipa_letter_distance.csv"));
     }
 
     static void KillAllProcesses()

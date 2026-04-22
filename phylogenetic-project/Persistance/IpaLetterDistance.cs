@@ -5,11 +5,11 @@ using System.IO;
 using System.Linq;
 namespace phylogenetic_project.Persistance;
 
-public class IpaDistanceProvider
+public class IpaLetterDistance
 {
     private ConcurrentDictionary<(string, string), decimal> ipaLetterDistanceDict;
 
-    public IpaDistanceProvider(string path)
+    public IpaLetterDistance(string path)
     {   
         ipaLetterDistanceDict = ReadPhoneticCsv(path);
     }
@@ -28,7 +28,7 @@ public class IpaDistanceProvider
         }
     }
 
-    public static ConcurrentDictionary<(string, string), decimal> ReadPhoneticCsv(string path)
+    private static ConcurrentDictionary<(string, string), decimal> ReadPhoneticCsv(string path)
     {
         var dict = new ConcurrentDictionary<(string, string), decimal>();
         var numberFormat = new NumberFormatInfo { NumberDecimalSeparator = "." };
