@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using ArgsParser;
-using phylogenetic_project.JobPresents;
+using phylogenetic_project.JobPresets;
 using phylogenetic_project.Persistance;
 
 namespace phylogenetic_project;
@@ -20,8 +20,9 @@ public sealed class ConfigSingelton
     private string? inputType = null;
     private string? inputTypePath = null;
     private string? inputTypeId = null;
-    private string? customIpaDistancePath = null;
     private ConcurrentDictionary<int, string>? mapIdbToName = null;
+    private LanguageRules[]? listOfLanguageRules = null;
+    private IpaLetterDistance? ipaLetterDistanceDict = null;
 
     private static ConfigSingelton instance = null!;
     private static object creationLock = new();
@@ -45,6 +46,7 @@ public sealed class ConfigSingelton
                 .RequiresOption<string>("book-idbs", "Idb's of books to analyze from input")
                 .RequiresOption<string>("chapters", "Chapters of books to analyze from input")
                 .SupportsFlag("no-python", "Disables python scripts")
+                .SupportsOption<string>("ipa-rules", "Path to ipa rules json")
                 .SupportsOption<string>("custom-ipa-distance", "Path to custom ipa distance")
                 .SupportsOption<string>("map-idb-to-name", "Path to map to idb json file")
                 .Parse();
@@ -68,8 +70,18 @@ public sealed class ConfigSingelton
             instance.chapters = parser.GetOption<string>("chapters").Split(",").Select(x => Int32.Parse(x)).ToList();
             instance.chapters.Sort();
             instance.noPython = !parser.IsFlagProvided("no-python");
-            instance.customIpaDistancePath = parser.GetOption<string>("custom-ipa-distance");
-            
+            string? ipaRulesPath = parser.GetOption<string>("ipa-rules");
+            if (ipaRulesPath != null)
+            {
+                this.listOfLanguageRules = Persistance.GetLanguageRules.ReadFromFile(ipaRulesPath);
+            }
+
+            string? customIpaDistancePath = parser.GetOption<string>("custom-ipa-distance");
+            if (customIpaDistancePath != null)
+            {
+                this.ipaLetterDistanceDict = new Persistance.IpaLetterDistance(customIpaDistancePath);
+            }
+
             string? mapIdbToNameFilePath = parser.GetOption<string>("map-idb-to-name");
             if (mapIdbToNameFilePath != null)
             {
@@ -119,27 +131,39 @@ public sealed class ConfigSingelton
         switch (job)
         {
             case "phylogenetic-tree-standard-text":
-                this.jobPreset = new phylogenetic_project.JobPresets.Collection.StandardLevenshtein(
+                this.jobPreset = new JobPresets.Collection.StandardLevenshtein(
                     getChapterConstruct: this.inputStruct,
                     chapters: this.chapters,
                     bookIDBs: this.bookIdbs,
                     outputResultPath: Path.Combine(this.outputFolderPath, "results", "phylogenetic-tree-standard-text", timeNow),
-                    noPython: this.noPython
+                    noPython: this.noPython,
+                    mapIdbToName: mapIdbToName
                 );
                 return;
 
             case "phylogenetic-tree-ipa-singular-choice":
-                this.jobPreset = new phylogenetic_project.JobPresets.Collection.IPAFirstSingularChoiceLevenshtein(
+                ArgumentNullException.ThrowIfNull(this.listOfLanguageRules);
+
+                this.jobPreset = new JobPresets.Collection.IPAFirstSingularChoiceLevenshtein(
                     getChapterConstruct: this.inputStruct,
                     chapters: this.chapters,
                     bookIDBs: this.bookIdbs,
-                    outputResultPath: Path.Combine(this.outputFolderPath, "results", "phylogenetic-tree-standard-text", timeNow),
-                    noPython: this.noPython
+                    outputResultPath: Path.Combine(this.outputFolderPath, "results", "phylogenetic-tree-ipa-singular-choice", timeNow),
+                    listOfLanguageRules: this.listOfLanguageRules,
+                    noPython: this.noPython,
+                    mapIdbToName: mapIdbToName
                 );
 
                 return;
             case "phylogenetic-tree-ipa-random-choice":
                 throw new NotImplementedException(job);
+            case "experimentation":
+                this.jobPreset = new phylogenetic_project.JobPresets.Collection.Experimentation(
+                    getChapterConstruct: this.inputStruct,
+                    chapters: this.chapters,
+                    bookIDBs: this.bookIdbs
+                );
+                return;
 
             default:
                 throw new Exception("wrong job type. Check documentation for job input.");

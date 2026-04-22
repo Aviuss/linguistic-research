@@ -13,9 +13,9 @@ public class IPAFirstSingularChoiceLevenshteinCellChapterJobWithCustomIpaDistanc
     public List<int> chapters { get; set; } = new List<int>();
 
     Persistance.IGetChapter GetChapterConstruct;
-    Persistance.IpaDistanceProvider ipaDistanceElement;
+    Persistance.IpaLetterDistance ipaDistanceElement;
 
-    public IPAFirstSingularChoiceLevenshteinCellChapterJobWithCustomIpaDistance(Persistance.IGetChapter getChapterConstruct, Persistance.IpaDistanceProvider ipaDistanceElement_)
+    public IPAFirstSingularChoiceLevenshteinCellChapterJobWithCustomIpaDistance(Persistance.IGetChapter getChapterConstruct, Persistance.IpaLetterDistance ipaDistanceElement_)
     {
         GetChapterConstruct = getChapterConstruct;
         ipaDistanceElement = ipaDistanceElement_;

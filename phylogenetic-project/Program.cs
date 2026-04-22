@@ -1,4 +1,4 @@
-﻿using phylogenetic_project.JobPresents;
+﻿using phylogenetic_project.JobPresets;
 using phylogenetic_project.Persistance;
 using phylogenetic_project.StaticMethods;
 using System;
@@ -27,7 +27,7 @@ public class Program
     public static CancellationTokenSource cts = new();
     public static bool dontCreateDataInTemporaryFolder = false;
 
-    public static IpaDistanceProvider? ipaLetterDistanceDict;
+    public static IpaLetterDistance? ipaLetterDistanceDict;
 
     public static ConfigSingelton config = ConfigSingelton.Instance;
 
@@ -38,7 +38,7 @@ public class Program
             Console.WriteLine($"Current Working Directory: \"{Directory.GetCurrentDirectory()}\"");
             Console.WriteLine("DEVELOPMENT ARGS INJECTION");
             args = @"
-                --job phylogenetic-tree-standard-text
+                --job phylogenetic-tree-ipa-singular-choice
                 
                 --input-type sql
                 --input-type-path ../../../../input_data/SadownikDB.sqlite
@@ -46,9 +46,10 @@ public class Program
 
                 --output-folder-path ../../../../output_data/
 
-                --book-idbs 28,29,36,38,46,37,44,39,43,33,42
-                --chapters 1,2,3
+                --book-idbs 28,29,38
+                --chapters 2,3,4
                 --map-idb-to-name ../../../../input_data/map_idb_to_name.json
+                --ipa-rules ../../../../input_data/ipa_rules.json
                 ".Split(" ").Select(x => x.Trim()).Where(x => x.Length > 0).ToArray();
         }
 
@@ -92,13 +93,13 @@ public class Program
     {        
 
         //mapIdbToName = Persistance.MapIdbToName.ReadFromFile();
-        listOfLanguageRules = Persistance.GetLanguageRules.ReadFromFile();
+        //listOfLanguageRules = Persistance.GetLanguageRules.ReadFromFile();
 
         cacheDB = new Persistance.CacheDB(
             dbPath: Path.Combine(dataAndResultsPath, "cache/cache.sqlite")
         );
 
-        ipaLetterDistanceDict = new Persistance.IpaDistanceProvider(Path.Combine(dataAndResultsPath, "json settings", "ipa_letter_distance.csv"));
+        ipaLetterDistanceDict = new Persistance.IpaLetterDistance(Path.Combine(dataAndResultsPath, "json settings", "ipa_letter_distance.csv"));
     }
 
     static void KillAllProcesses()

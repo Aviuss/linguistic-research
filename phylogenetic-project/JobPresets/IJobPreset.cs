@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace phylogenetic_project.JobPresents;
+namespace phylogenetic_project.JobPresets;
 
 public interface IJobPreset
 {   

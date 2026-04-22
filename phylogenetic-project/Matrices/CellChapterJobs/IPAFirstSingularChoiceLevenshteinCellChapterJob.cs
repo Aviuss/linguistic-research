@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using phylogenetic_project.Persistance;
 
 namespace phylogenetic_project.Matrices.CellChapterJobs;
 
@@ -12,11 +13,15 @@ public class IPAFirstSingularChoiceLevenshteinCellChapterJob: IMatrixCellChapter
     public List<int> bookIDBs { get; set; }  = new List<int>();
     public List<int> chapters { get; set; } = new List<int>();
 
-    Persistance.IGetChapter GetChapterConstruct;
+    private Persistance.IGetChapter GetChapterConstruct;
+    private LanguageRules[] listOfLanguageRules;
 
-    public IPAFirstSingularChoiceLevenshteinCellChapterJob(Persistance.IGetChapter getChapterConstruct)
+    public IPAFirstSingularChoiceLevenshteinCellChapterJob(
+        Persistance.IGetChapter getChapterConstruct,
+        LanguageRules[] listOfLanguageRules)
     {
         GetChapterConstruct = getChapterConstruct;
+        this.listOfLanguageRules = listOfLanguageRules;
     }
 
     public LevenshteinIndividualDataInt Calculate(int idx_idb1, int idx_idb2, int idx_chapter)
@@ -27,9 +32,9 @@ public class IPAFirstSingularChoiceLevenshteinCellChapterJob: IMatrixCellChapter
         string text_idb1 = GetChapterConstruct.GetChapter(idb1, chapterNo);
         string text_idb2 = GetChapterConstruct.GetChapter(idb2, chapterNo);
 
-        Persistance.LanguageRules? ipaRule_idb1 = Program.listOfLanguageRules?.Find(element => element.IdbCompatible.Contains(idb1));
+        Persistance.LanguageRules? ipaRule_idb1 = Array.Find(this.listOfLanguageRules, element => element.IdbCompatible.Contains(idb1));
         ArgumentNullException.ThrowIfNull(ipaRule_idb1);
-        Persistance.LanguageRules? ipaRule_idb2 = Program.listOfLanguageRules?.Find(element => element.IdbCompatible.Contains(idb2));
+        Persistance.LanguageRules? ipaRule_idb2 = Array.Find(this.listOfLanguageRules, element => element.IdbCompatible.Contains(idb2));
         ArgumentNullException.ThrowIfNull(ipaRule_idb2);
 
         var ipaText_idb1 = StaticMethods.IPA.ConvertToIpa(

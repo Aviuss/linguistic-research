@@ -14,10 +14,10 @@ public class IPARandomChoiceLevenshteinCellChapterJobWithCustomIpaDistance: IMat
 
     Persistance.IGetChapter GetChapterConstruct;
     long randomSize = 100;
-    Persistance.IpaDistanceProvider ipaDistanceElement;
+    Persistance.IpaLetterDistance ipaDistanceElement;
     bool parallelExecution;
 
-    public IPARandomChoiceLevenshteinCellChapterJobWithCustomIpaDistance(Persistance.IGetChapter getChapterConstruct, long randomSize_, Persistance.IpaDistanceProvider ipaDistanceElement_, bool parallelExecution_ = false)
+    public IPARandomChoiceLevenshteinCellChapterJobWithCustomIpaDistance(Persistance.IGetChapter getChapterConstruct, long randomSize_, Persistance.IpaLetterDistance ipaDistanceElement_, bool parallelExecution_ = false)
     {
         GetChapterConstruct = getChapterConstruct;
         randomSize = randomSize_;

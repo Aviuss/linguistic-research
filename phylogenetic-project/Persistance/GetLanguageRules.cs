@@ -5,9 +5,9 @@ namespace phylogenetic_project.Persistance;
 
 public class GetLanguageRules
 {
-    public static List<LanguageRules> ReadFromFile()
+    public static LanguageRules[] ReadFromFile(string filePath)
     {
-        string json = File.ReadAllText(Path.Combine(Program.dataAndResultsPath, "json settings", "ipa_rules.json"));
+        string json = File.ReadAllText(filePath);
 
         var options = new JsonSerializerOptions
         {
@@ -15,7 +15,7 @@ public class GetLanguageRules
             ReadCommentHandling = JsonCommentHandling.Skip
         };
 
-        List<LanguageRules>? data = JsonSerializer.Deserialize<List<LanguageRules>>(json, options);
+        LanguageRules[]? data = JsonSerializer.Deserialize<LanguageRules[]>(json, options);
         
         if (data == null)
         {
