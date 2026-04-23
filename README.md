@@ -5,7 +5,7 @@
 
 `python3.11 -m venv venv`
 `source venv/bin/activate`
-`pip install biopython ete3 numpy PyQt5 lxml six`
+`pip install biopython==1.87 ete3==3.1.3 numpy==2.4.4 PyQt5==5.15.11 lxml==6.1.0 six==1.17.0`
 
 - dotnet 10.0
 
