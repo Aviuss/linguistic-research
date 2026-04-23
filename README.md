@@ -3,20 +3,23 @@
 
 # starting app
 
-Make sure you have following files:
-- /data and results/book database/SadownikDB.sqlite
-- /data and results/json settings/ipa_rules.json
-- /data and results/json settings/map_idb_to_name.json
-- /data and results/json settings/ipa_letter_distance.csv
+`python3.11 -m venv venv`
+`source venv/bin/activate`
+`pip install biopython ete3 numpy PyQt5 lxml six`
 
-also:
-- dotnet about 10.0
-- required python libraries (if not provided, the script would generate matrix but crash during tree generation. It is okey, as long as you only need matrix)
+- dotnet 10.0
 
 launching:
 - cd phylogenetic-project
 - dotnet build
 - dotnet run
+
+ensure you have all files (probably in input_data directory) to run below mock cli command:
+
+test:
+```
+dotnet run --job phylogenetic-tree-standard-text --input-type sql --input-type-path ../input_data/SadownikDB.sqlite --input-type-id sadownikdb --output-folder-path ../output_data/ --book-idbs 28,29,36 --chapters 1,2 --no-python
+```
 
 # docs
 

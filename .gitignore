@@ -64,3 +64,5 @@ output_data/cache/cache.sqlite-wal
 output_data/results/*
 
 .vs/
+
+venv
