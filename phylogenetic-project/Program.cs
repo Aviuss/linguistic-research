@@ -40,9 +40,9 @@ public class Program
             args = @"
                 --job phylogenetic-tree-ipa-singular-choice
                 
-                --input-type sql
-                --input-type-path ../../../../input_data/SadownikDB.sqlite
-                --input-type-id sadownikdb
+                --input-type json
+                --input-type-path ../../../../input_data/chapter_16_sentence_maching.json
+                --input-type-id chapter_16_sentence_maching
 
                 --output-folder-path ../../../../output_data/
 

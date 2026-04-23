@@ -158,10 +158,14 @@ public sealed class ConfigSingelton
             case "phylogenetic-tree-ipa-random-choice":
                 throw new NotImplementedException(job);
             case "experimentation":
+                ArgumentNullException.ThrowIfNull(this.listOfLanguageRules);
+
                 this.jobPreset = new phylogenetic_project.JobPresets.Collection.Experimentation(
                     getChapterConstruct: this.inputStruct,
                     chapters: this.chapters,
-                    bookIDBs: this.bookIdbs
+                    bookIDBs: this.bookIdbs,
+                    listOfLanguageRules: this.listOfLanguageRules,
+                    threshold: (decimal)0.8
                 );
                 return;
 
