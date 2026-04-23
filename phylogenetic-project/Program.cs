@@ -38,7 +38,7 @@ public class Program
             Console.WriteLine($"Current Working Directory: \"{Directory.GetCurrentDirectory()}\"");
             Console.WriteLine("DEVELOPMENT ARGS INJECTION");
             args = @"
-                --job phylogenetic-tree-ipa-singular-choice
+                --job phylogenetic-tree-ipa-random-choice
                 
                 --input-type sql
                 --input-type-path ../../../../input_data/SadownikDB.sqlite
@@ -51,7 +51,7 @@ public class Program
                 --map-idb-to-name ../../../../input_data/map_idb_to_name.json
                 --ipa-rules ../../../../input_data/ipa_rules.json
                 --no-python
-                --custom-ipa-distance ../../../../input_data/ipa_letter_distance.csv
+                --random-ipa-iterations 5
                 ".Split(" ").Select(x => x.Trim()).Where(x => x.Length > 0).ToArray();
         }
 

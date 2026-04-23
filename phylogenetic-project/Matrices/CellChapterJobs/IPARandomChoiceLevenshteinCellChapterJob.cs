@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using phylogenetic_project.Persistance;
 
 namespace phylogenetic_project.Matrices.CellChapterJobs;
 
@@ -14,11 +15,17 @@ public class IPARandomChoiceLevenshteinCellChapterJob: IMatrixCellChapterJob<Lev
 
     Persistance.IGetChapter GetChapterConstruct;
     long randomSize = 100;
+    private LanguageRules[] listOfLanguageRules;
 
-    public IPARandomChoiceLevenshteinCellChapterJob(Persistance.IGetChapter getChapterConstruct, long randomSize_)
+    public IPARandomChoiceLevenshteinCellChapterJob(
+        Persistance.IGetChapter getChapterConstruct,
+        long randomSize_,
+        LanguageRules[] listOfLanguageRules
+    )
     {
         GetChapterConstruct = getChapterConstruct;
         randomSize = randomSize_;
+        this.listOfLanguageRules = listOfLanguageRules;
     }
 
     public LevenshteinIndividualDataDecimal Calculate(int idx_idb1, int idx_idb2, int idx_chapter)
@@ -29,9 +36,9 @@ public class IPARandomChoiceLevenshteinCellChapterJob: IMatrixCellChapterJob<Lev
         string text_idb1 = GetChapterConstruct.GetChapter(idb1, chapterNo);
         string text_idb2 = GetChapterConstruct.GetChapter(idb2, chapterNo);
 
-        Persistance.LanguageRules? ipaRule_idb1 = Program.listOfLanguageRules?.Find(element => element.IdbCompatible.Contains(idb1));
+        Persistance.LanguageRules? ipaRule_idb1 = Array.Find(listOfLanguageRules, element => element.IdbCompatible.Contains(idb1));
         ArgumentNullException.ThrowIfNull(ipaRule_idb1);
-        Persistance.LanguageRules? ipaRule_idb2 = Program.listOfLanguageRules?.Find(element => element.IdbCompatible.Contains(idb2));
+        Persistance.LanguageRules? ipaRule_idb2 = Array.Find(listOfLanguageRules, element => element.IdbCompatible.Contains(idb2));
         ArgumentNullException.ThrowIfNull(ipaRule_idb2);
 
         var ipaText_idb1 = StaticMethods.IPA.ConvertToIpa(

@@ -37,6 +37,7 @@ While generating trees using ipa we can choose the options for it.
 
 required parameters:
 - `--ipa-rules [path]`
+- `--random-ipa-iterations [int]` required only for random choice job (second)
 
 optional parameters:
 - `--custom-ipa-distance [path]`

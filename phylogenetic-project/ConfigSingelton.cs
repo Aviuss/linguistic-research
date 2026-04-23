@@ -23,6 +23,7 @@ public sealed class ConfigSingelton
     private ConcurrentDictionary<int, string>? mapIdbToName = null;
     private LanguageRules[]? listOfLanguageRules = null;
     private IpaCustomLetterDistance? ipaCustomLetterDistanceDict = null;
+    private int? randomIpaIterations = null;
 
     private static ConfigSingelton instance = null!;
     private static object creationLock = new();
@@ -45,10 +46,11 @@ public sealed class ConfigSingelton
                 .RequiresOption<string>("output-folder-path", "Path of Program's output")
                 .RequiresOption<string>("book-idbs", "Idb's of books to analyze from input")
                 .RequiresOption<string>("chapters", "Chapters of books to analyze from input")
-                .SupportsFlag("no-python", "Disables python scripts")
                 .SupportsOption<string>("ipa-rules", "Path to ipa rules json")
                 .SupportsOption<string>("custom-ipa-distance", "Path to custom ipa distance")
                 .SupportsOption<string>("map-idb-to-name", "Path to map to idb json file")
+                .SupportsOption<int>("random-ipa-iterations", "Number of iterations for random iteration job")
+                .SupportsFlag("no-python", "Disables python scripts")
                 .Parse();
             
             if (parser.HasErrors)
@@ -86,6 +88,12 @@ public sealed class ConfigSingelton
             if (mapIdbToNameFilePath != null)
             {
                 instance.mapIdbToName = Persistance.MapIdbToName.ReadFromFile(mapIdbToNameFilePath);
+            }
+
+            this.randomIpaIterations = parser.GetOption<int>("random-ipa-iterations");
+            if (this.randomIpaIterations == 0)
+            {
+                this.randomIpaIterations = null;
             }
 
             instance.LoadInputType();
@@ -168,12 +176,31 @@ public sealed class ConfigSingelton
                         mapIdbToName: mapIdbToName
                     );
                 }
-
-                
-
                 return;
+
             case "phylogenetic-tree-ipa-random-choice":
-                throw new NotImplementedException(job);
+                ArgumentNullException.ThrowIfNull(this.listOfLanguageRules);
+                _ = this.randomIpaIterations ?? throw new ArgumentNullException(nameof(this.randomIpaIterations));
+                
+                if (this.ipaCustomLetterDistanceDict == null)
+                {
+                    this.jobPreset = new JobPresets.Collection.IPARandomChoiceLevenshteinAveragedPreset(
+                        getChapterConstruct: this.inputStruct,
+                        chapters: this.chapters,
+                        bookIDBs: this.bookIdbs,
+                        outputResultPath: Path.Combine(this.outputFolderPath, "results", "phylogenetic-tree-ipa-random-choice", timeNow),
+                        listOfLanguageRules: this.listOfLanguageRules,
+                        randomSize: this.randomIpaIterations.Value,
+                        noPython: this.noPython,
+                        mapIdbToName: mapIdbToName
+                    );    
+
+                } else
+                {
+                    throw new NotImplementedException(job);    
+                }
+                return;
+
             case "experimentation":
                 ArgumentNullException.ThrowIfNull(this.listOfLanguageRules);
 
