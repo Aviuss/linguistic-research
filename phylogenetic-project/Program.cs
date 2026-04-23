@@ -27,7 +27,7 @@ public class Program
     public static CancellationTokenSource cts = new();
     public static bool dontCreateDataInTemporaryFolder = false;
 
-    public static IpaLetterDistance? ipaLetterDistanceDict;
+    public static IpaCustomLetterDistance? ipaLetterDistanceDict;
 
     public static ConfigSingelton config = ConfigSingelton.Instance;
 
@@ -40,16 +40,18 @@ public class Program
             args = @"
                 --job phylogenetic-tree-ipa-singular-choice
                 
-                --input-type json
-                --input-type-path ../../../../input_data/chapter_16_sentence_maching.json
-                --input-type-id chapter_16_sentence_maching
+                --input-type sql
+                --input-type-path ../../../../input_data/SadownikDB.sqlite
+                --input-type-id sadownikdb
 
                 --output-folder-path ../../../../output_data/
 
-                --book-idbs 28,29,38
-                --chapters 2,3,4
+                --book-idbs 29,28,44,43,39,38,37,46,36,33,42
+                --chapters 1
                 --map-idb-to-name ../../../../input_data/map_idb_to_name.json
                 --ipa-rules ../../../../input_data/ipa_rules.json
+                --no-python
+                --custom-ipa-distance ../../../../input_data/ipa_letter_distance.csv
                 ".Split(" ").Select(x => x.Trim()).Where(x => x.Length > 0).ToArray();
         }
 
@@ -99,7 +101,7 @@ public class Program
             dbPath: Path.Combine(dataAndResultsPath, "cache/cache.sqlite")
         );
 
-        ipaLetterDistanceDict = new Persistance.IpaLetterDistance(Path.Combine(dataAndResultsPath, "json settings", "ipa_letter_distance.csv"));
+        //ipaLetterDistanceDict = new Persistance.IpaLetterDistance(Path.Combine(dataAndResultsPath, "json settings", "ipa_letter_distance.csv"));
     }
 
     static void KillAllProcesses()

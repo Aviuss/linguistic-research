@@ -36,13 +36,13 @@ public class IPARandomChoiceLevenshteinAveragedPreset : IJobPreset
             cacheDBIDWrapper_: new Persistance.CacheDBIDWrapper(Program.cacheDB, jobId, JsonSerializer.Serialize(algorithmArgs))
          );
 
-        if (Program.doParallelIfPossible)
+        /*if (Program.doParallelIfPossible)
         {
             levenshteinMatrix.CalculateResultMatrixInParallel(jobId, Program.showProgressBar);
         } else
-        {
+        {*/
             _ = levenshteinMatrix.CalculateResultMatrix(Program.showProgressBar);
-        }
+        //}
         Console.WriteLine(levenshteinMatrix.ToString());
 
         if (Program.dontCreateDataInTemporaryFolder) { return; }

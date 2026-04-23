@@ -7,6 +7,7 @@ public class IPA
 {
     public static List<string[]> ConvertToIpa(string text, Persistance.LanguageRules rule)
     {
+        //text = text.ToLowerInvariant();
         List<StringBuilder[]> choices = [];
         int maxCharLen = 0;
         foreach (var element in rule.Rules)

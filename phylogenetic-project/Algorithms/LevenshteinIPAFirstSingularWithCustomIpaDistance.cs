@@ -7,7 +7,7 @@ namespace phylogenetic_project.Algorithms;
 public class LevenshteinIPAFirstSingularWithCustomIpaDistance
 {
     public static LevenshteinIndividualDataDecimal Calculate
-        (List<string[]> inputText1, List<string[]> inputText2, Persistance.IpaLetterDistance ipaLetterDistanceDict)
+        (List<string[]> inputText1, List<string[]> inputText2, Persistance.IpaCustomLetterDistance ipaLetterDistanceDict)
     {   
         string txt1String = string.Join("", inputText1.Select(element => element[0]).ToList());
         string txt2String = string.Join("", inputText2.Select(element => element[0]).ToList());

@@ -22,7 +22,7 @@ public sealed class ConfigSingelton
     private string? inputTypeId = null;
     private ConcurrentDictionary<int, string>? mapIdbToName = null;
     private LanguageRules[]? listOfLanguageRules = null;
-    private IpaLetterDistance? ipaLetterDistanceDict = null;
+    private IpaCustomLetterDistance? ipaCustomLetterDistanceDict = null;
 
     private static ConfigSingelton instance = null!;
     private static object creationLock = new();
@@ -79,7 +79,7 @@ public sealed class ConfigSingelton
             string? customIpaDistancePath = parser.GetOption<string>("custom-ipa-distance");
             if (customIpaDistancePath != null)
             {
-                this.ipaLetterDistanceDict = new Persistance.IpaLetterDistance(customIpaDistancePath);
+                this.ipaCustomLetterDistanceDict = new Persistance.IpaCustomLetterDistance(customIpaDistancePath);
             }
 
             string? mapIdbToNameFilePath = parser.GetOption<string>("map-idb-to-name");
@@ -143,16 +143,33 @@ public sealed class ConfigSingelton
 
             case "phylogenetic-tree-ipa-singular-choice":
                 ArgumentNullException.ThrowIfNull(this.listOfLanguageRules);
+                
+                if (this.ipaCustomLetterDistanceDict == null)
+                {
+                    this.jobPreset = new JobPresets.Collection.IPAFirstSingularChoiceLevenshtein(
+                        getChapterConstruct: this.inputStruct,
+                        chapters: this.chapters,
+                        bookIDBs: this.bookIdbs,
+                        outputResultPath: Path.Combine(this.outputFolderPath, "results", "phylogenetic-tree-ipa-singular-choice", timeNow),
+                        listOfLanguageRules: this.listOfLanguageRules,
+                        noPython: this.noPython,
+                        mapIdbToName: mapIdbToName
+                    );    
+                } else
+                {
+                    this.jobPreset = new JobPresets.Collection.IPAFirstSingularChoiceLevenshteinWithCusomIpaDistancePreset(
+                        getChapterConstruct: this.inputStruct,
+                        chapters: this.chapters,
+                        bookIDBs: this.bookIdbs,
+                        outputResultPath: Path.Combine(this.outputFolderPath, "results", "phylogenetic-tree-ipa-singular-choice w custom-ipa-distance", timeNow),
+                        listOfLanguageRules: this.listOfLanguageRules,
+                        ipaLetterDistanceDict: this.ipaCustomLetterDistanceDict,
+                        noPython: this.noPython,
+                        mapIdbToName: mapIdbToName
+                    );
+                }
 
-                this.jobPreset = new JobPresets.Collection.IPAFirstSingularChoiceLevenshtein(
-                    getChapterConstruct: this.inputStruct,
-                    chapters: this.chapters,
-                    bookIDBs: this.bookIdbs,
-                    outputResultPath: Path.Combine(this.outputFolderPath, "results", "phylogenetic-tree-ipa-singular-choice", timeNow),
-                    listOfLanguageRules: this.listOfLanguageRules,
-                    noPython: this.noPython,
-                    mapIdbToName: mapIdbToName
-                );
+                
 
                 return;
             case "phylogenetic-tree-ipa-random-choice":

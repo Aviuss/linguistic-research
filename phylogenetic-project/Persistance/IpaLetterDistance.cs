@@ -5,11 +5,11 @@ using System.IO;
 using System.Linq;
 namespace phylogenetic_project.Persistance;
 
-public class IpaLetterDistance
+public class IpaCustomLetterDistance
 {
     private ConcurrentDictionary<(string, string), decimal> ipaLetterDistanceDict;
 
-    public IpaLetterDistance(string path)
+    public IpaCustomLetterDistance(string path)
     {   
         ipaLetterDistanceDict = ReadPhoneticCsv(path);
     }

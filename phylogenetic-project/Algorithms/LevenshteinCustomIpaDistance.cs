@@ -5,7 +5,7 @@ namespace phylogenetic_project.Algorithms;
 
 public class LevenshteinCustomIpaDistance
 {
-    public static decimal Distance(string a, string b, Persistance.IpaLetterDistance ipaLetterDistanceDict)
+    public static decimal Distance(string a, string b, Persistance.IpaCustomLetterDistance ipaLetterDistanceDict)
     {
         var aTrueLen = new StringInfo(a).LengthInTextElements;
         var bTrueLen = new StringInfo(b).LengthInTextElements;
@@ -41,7 +41,7 @@ public class LevenshteinCustomIpaDistance
         return d[aTrueLen, bTrueLen];
     }
 
-    public static decimal DistanceNormalised(string a, string b, Persistance.IpaLetterDistance ipaLetterDistanceDict)
+    public static decimal DistanceNormalised(string a, string b, Persistance.IpaCustomLetterDistance ipaLetterDistanceDict)
     {
         var aTrueLen = new StringInfo(a).LengthInTextElements;
         var bTrueLen = new StringInfo(b).LengthInTextElements;

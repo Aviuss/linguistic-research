@@ -42,8 +42,8 @@ public class BookMatrix<T_FieldData>
         if (matrixCellChapterJob_ != null)
         {
             matrixCellChapterJob = matrixCellChapterJob_;
-            matrixCellChapterJob.bookIDBs = bookIDBs;
-            matrixCellChapterJob.chapters = chapters;
+            matrixCellChapterJob.bookIDBs = bookIDBs; // TODO: delete this, and pass in the constructor. Like, why is it there??
+            matrixCellChapterJob.chapters = chapters; // TODO: delete this, and pass in the constructor. Like, why is it there??
         }
         cacheDBIDWrapper = cacheDBIDWrapper_;
     }
@@ -130,7 +130,8 @@ public class BookMatrix<T_FieldData>
         return result_matrix;
     }
 
-    public void CalculateResultMatrixInParallel(string jobId, bool showProgressBar = true)
+    // deprecated for now. After more analysis, if it is truelly usefull I may enable it.
+    /*public void CalculateResultMatrixInParallel(string jobId, bool showProgressBar = true)
     {
         if (matrixCellChapterJob == null) { return; }
         if (cacheDBIDWrapper == null)
@@ -165,7 +166,7 @@ public class BookMatrix<T_FieldData>
         Task.WaitAll(tasks.ToArray());
 
         CalculateResultMatrix(false);
-    }
+    }*/
 
     private Task CreateParallelStatusTask(int alreadyCached, bool[,,] doneMatrix)
     {
