@@ -69,7 +69,7 @@ public sealed class ConfigSingelton
             instance.bookIdbs.Sort();
             instance.chapters = parser.GetOption<string>("chapters").Split(",").Select(x => Int32.Parse(x)).ToList();
             instance.chapters.Sort();
-            instance.noPython = !parser.IsFlagProvided("no-python");
+            instance.noPython = parser.IsFlagProvided("no-python");
             string? ipaRulesPath = parser.GetOption<string>("ipa-rules");
             if (ipaRulesPath != null)
             {
