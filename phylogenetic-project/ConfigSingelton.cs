@@ -20,8 +20,9 @@ public sealed class ConfigSingelton
     private string? inputType = null;
     private string? inputTypePath = null;
     private string? inputTypeId = null;
+
     private ConcurrentDictionary<int, string>? mapIdbToName = null;
-    private LanguageRules[]? listOfLanguageRules = null;
+    private LanguageRulesWrapper? languageRulesWrapper = null;
     private IpaCustomLetterDistance? ipaCustomLetterDistanceDict = null;
     private int? randomIpaIterations = null;
 
@@ -30,6 +31,7 @@ public sealed class ConfigSingelton
     private static object passArgsLock = new();
     private List<IDisposable> disposables = [];
     private ConfigSingelton() {}
+    private CacheDB? cachedb = null;
 
     public void PassArgs(string[] args)
     {
@@ -47,7 +49,10 @@ public sealed class ConfigSingelton
                 .RequiresOption<string>("book-idbs", "Idb's of books to analyze from input")
                 .RequiresOption<string>("chapters", "Chapters of books to analyze from input")
                 .SupportsOption<string>("ipa-rules", "Path to ipa rules json")
+                .SupportsOption<string>("ipa-rules-id", "Identifyier defining ipa rules resource for valid caching")
+                .SupportsOption<string>("cache-path", "Path to cache (if not present, it will be created)")
                 .SupportsOption<string>("custom-ipa-distance", "Path to custom ipa distance")
+                .SupportsOption<string>("custom-ipa-distance-id", "Id for custom ipa distance")
                 .SupportsOption<string>("map-idb-to-name", "Path to map to idb json file")
                 .SupportsOption<int>("random-ipa-iterations", "Number of iterations for random iteration job")
                 .SupportsFlag("no-python", "Disables python scripts")
@@ -72,16 +77,19 @@ public sealed class ConfigSingelton
             instance.chapters = parser.GetOption<string>("chapters").Split(",").Select(x => Int32.Parse(x)).ToList();
             instance.chapters.Sort();
             instance.noPython = parser.IsFlagProvided("no-python");
+            
             string? ipaRulesPath = parser.GetOption<string>("ipa-rules");
-            if (ipaRulesPath != null)
+            string? ipaRulesId = parser.GetOption<string>("ipa-rules-id");    
+            if (ipaRulesPath != null && ipaRulesId != null)
             {
-                this.listOfLanguageRules = Persistance.GetLanguageRules.ReadFromFile(ipaRulesPath);
+                this.languageRulesWrapper = new Persistance.LanguageRulesWrapper(ipaRulesId, ipaRulesId);
             }
 
             string? customIpaDistancePath = parser.GetOption<string>("custom-ipa-distance");
-            if (customIpaDistancePath != null)
+            string? customIpaDistanceId = parser.GetOption<string>("custom-ipa-distance-id");
+            if (customIpaDistancePath != null && customIpaDistanceId != null)
             {
-                this.ipaCustomLetterDistanceDict = new Persistance.IpaCustomLetterDistance(customIpaDistancePath);
+                this.ipaCustomLetterDistanceDict = new Persistance.IpaCustomLetterDistance(customIpaDistancePath, customIpaDistanceId);
             }
 
             string? mapIdbToNameFilePath = parser.GetOption<string>("map-idb-to-name");
@@ -94,6 +102,12 @@ public sealed class ConfigSingelton
             if (this.randomIpaIterations == 0)
             {
                 this.randomIpaIterations = null;
+            }
+
+            string? cacheDbPath = parser.GetOption<string>("cache-path");
+            if (cacheDbPath != null)
+            {
+                cachedb = new CacheDB(cacheDbPath);
             }
 
             instance.LoadInputType();
@@ -109,7 +123,7 @@ public sealed class ConfigSingelton
 
         if (this.inputType == "sql")
         {
-            Sadownikdb sqlResource = new(
+            GetChapterFromSqlite sqlResource = new(
                 dbPath: this.inputTypePath,
                 resourceId: this.inputTypeId
             );
@@ -118,7 +132,7 @@ public sealed class ConfigSingelton
             this.inputStruct = sqlResource;
             return;
         } else if (this.inputType == "json") {
-            this.inputStruct = new Persistance.FourPhrasesFromChapterOne(
+            this.inputStruct = new Persistance.GetChapterFromJson(
                 dataPath: this.inputTypePath,
                 resourceId: this.inputTypeId
             );
@@ -150,7 +164,7 @@ public sealed class ConfigSingelton
                 return;
 
             case "phylogenetic-tree-ipa-singular-choice":
-                ArgumentNullException.ThrowIfNull(this.listOfLanguageRules);
+                ArgumentNullException.ThrowIfNull(this.languageRulesWrapper);
                 
                 if (this.ipaCustomLetterDistanceDict == null)
                 {
@@ -159,7 +173,7 @@ public sealed class ConfigSingelton
                         chapters: this.chapters,
                         bookIDBs: this.bookIdbs,
                         outputResultPath: Path.Combine(this.outputFolderPath, "results", "phylogenetic-tree-ipa-singular-choice", timeNow),
-                        listOfLanguageRules: this.listOfLanguageRules,
+                        languageRulesWrapper: this.languageRulesWrapper,
                         noPython: this.noPython,
                         mapIdbToName: mapIdbToName
                     );    
@@ -170,7 +184,7 @@ public sealed class ConfigSingelton
                         chapters: this.chapters,
                         bookIDBs: this.bookIdbs,
                         outputResultPath: Path.Combine(this.outputFolderPath, "results", "phylogenetic-tree-ipa-singular-choice w custom-ipa-distance", timeNow),
-                        listOfLanguageRules: this.listOfLanguageRules,
+                        languageRulesWrapper: this.languageRulesWrapper,
                         ipaLetterDistanceDict: this.ipaCustomLetterDistanceDict,
                         noPython: this.noPython,
                         mapIdbToName: mapIdbToName
@@ -179,7 +193,7 @@ public sealed class ConfigSingelton
                 return;
 
             case "phylogenetic-tree-ipa-random-choice":
-                ArgumentNullException.ThrowIfNull(this.listOfLanguageRules);
+                ArgumentNullException.ThrowIfNull(this.languageRulesWrapper);
                 _ = this.randomIpaIterations ?? throw new ArgumentNullException(nameof(this.randomIpaIterations));
                 
                 if (this.ipaCustomLetterDistanceDict == null)
@@ -189,7 +203,7 @@ public sealed class ConfigSingelton
                         chapters: this.chapters,
                         bookIDBs: this.bookIdbs,
                         outputResultPath: Path.Combine(this.outputFolderPath, "results", "phylogenetic-tree-ipa-random-choice", timeNow),
-                        listOfLanguageRules: this.listOfLanguageRules,
+                        languageRulesWrapper: this.languageRulesWrapper,
                         randomSize: this.randomIpaIterations.Value,
                         noPython: this.noPython,
                         mapIdbToName: mapIdbToName
@@ -201,7 +215,7 @@ public sealed class ConfigSingelton
                         chapters: this.chapters,
                         bookIDBs: this.bookIdbs,
                         outputResultPath: Path.Combine(this.outputFolderPath, "results", "phylogenetic-tree-ipa-random-choice", timeNow),
-                        listOfLanguageRules: this.listOfLanguageRules,
+                        languageRulesWrapper: this.languageRulesWrapper,
                         ipaLetterDistanceDict: this.ipaCustomLetterDistanceDict,
                         randomSize: this.randomIpaIterations.Value,
                         noPython: this.noPython,
@@ -211,13 +225,13 @@ public sealed class ConfigSingelton
                 return;
 
             case "experimentation":
-                ArgumentNullException.ThrowIfNull(this.listOfLanguageRules);
+                ArgumentNullException.ThrowIfNull(this.languageRulesWrapper);
 
                 this.jobPreset = new phylogenetic_project.JobPresets.Collection.Experimentation(
                     getChapterConstruct: this.inputStruct,
                     chapters: this.chapters,
                     bookIDBs: this.bookIdbs,
-                    listOfLanguageRules: this.listOfLanguageRules,
+                    languageRulesWrapper: this.languageRulesWrapper,
                     threshold: (decimal)0.8
                 );
                 return;

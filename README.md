@@ -37,10 +37,12 @@ While generating trees using ipa we can choose the options for it.
 
 required parameters:
 - `--ipa-rules [path]`
+- `--ipa-rules-id [string]` identifier for the resource (used mainly in valid caching)
 - `--random-ipa-iterations [int]` required only for random choice job (second)
 
 optional parameters:
 - `--custom-ipa-distance [path]`
+- `--custom-ipa-distance-id [string]` identifier for the resource (used mainly in valid caching)
 
 ### 3. Required params for phylogenetic tree generation
 
@@ -72,11 +74,15 @@ param e.g.: `--chapters 1,2,3`
 
 #### 4.1 `--no-python`
 
+C# code executes some python scripts to generate graphs and some python implemented algorithms. If not set up properly, may cause issues.
+
 #### 4.2 `--map-idb-to-name [path]`
 
 Maps `idb`s to more human readable names.
 
-C# code executes some python scripts to generate graphs and some python implemented algorithms. If not set up properly, may cause issues.
+#### 4.3 `-cache-path [path]`
+
+If not present, it will be created.
 
 # code docs
 

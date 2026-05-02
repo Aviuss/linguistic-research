@@ -9,20 +9,20 @@ public class Experimentation: IJobPreset
     private IGetChapter getChapterConstruct;
     private List<int> chapters;
     private List<int> bookIDBs;
-    private Persistance.LanguageRules[] listOfLanguageRules;
+    private Persistance.LanguageRulesWrapper languageRulesWrapper;
     private decimal threshold; //values should be >= than this
     public Experimentation(
         IGetChapter getChapterConstruct,
         List<int> chapters,
         List<int> bookIDBs,
-        Persistance.LanguageRules[] listOfLanguageRules,
+        Persistance.LanguageRulesWrapper languageRulesWrapper,
         decimal threshold
     )
     {
         this.getChapterConstruct = getChapterConstruct;
         this.chapters = chapters;
         this.bookIDBs = bookIDBs;
-        this.listOfLanguageRules = listOfLanguageRules;
+        this.languageRulesWrapper = languageRulesWrapper;
         this.threshold = threshold;
     }
 

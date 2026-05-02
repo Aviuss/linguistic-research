@@ -133,8 +133,4 @@ public class CacheDB: IDisposable
         GC.SuppressFinalize(this);
     }
 
-    internal void InsertCache(string v1, string v2, object value, int v3, int v4, int v5)
-    {
-        throw new NotImplementedException();
-    }
 }

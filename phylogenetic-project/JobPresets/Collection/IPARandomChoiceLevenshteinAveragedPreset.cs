@@ -20,7 +20,7 @@ public class IPARandomChoiceLevenshteinAveragedPreset : IJobPreset
     private string outputResultPath = null!;
     private bool noPython = false;
     private ConcurrentDictionary<int, string>? mapIdbToName = null;
-    private LanguageRules[] listOfLanguageRules = null!;
+    private LanguageRulesWrapper languageRulesWrapper = null!;
     private int randomSize = 10;
 
     public IPARandomChoiceLevenshteinAveragedPreset(
@@ -28,7 +28,7 @@ public class IPARandomChoiceLevenshteinAveragedPreset : IJobPreset
         List<int> chapters,
         List<int> bookIDBs,
         string outputResultPath,
-        Persistance.LanguageRules[] listOfLanguageRules,
+        Persistance.LanguageRulesWrapper languageRulesWrapper,
         int randomSize,
         bool noPython = false,
         ConcurrentDictionary<int, string>? mapIdbToName = null
@@ -38,7 +38,7 @@ public class IPARandomChoiceLevenshteinAveragedPreset : IJobPreset
         this.chapters = chapters;
         this.bookIDBs = bookIDBs;
         this.outputResultPath = outputResultPath;
-        this.listOfLanguageRules = listOfLanguageRules;
+        this.languageRulesWrapper = languageRulesWrapper;
         this.randomSize = randomSize;
         this.noPython = noPython;
         this.mapIdbToName = mapIdbToName;
@@ -52,7 +52,7 @@ public class IPARandomChoiceLevenshteinAveragedPreset : IJobPreset
             matrixCellChapterJob_: new Matrices.CellChapterJobs.IPARandomChoiceLevenshteinCellChapterJob(
                 getChapterConstruct:getChapterConstruct,
                 randomSize_: this.randomSize,
-                listOfLanguageRules: this.listOfLanguageRules
+                listOfLanguageRules: this.languageRulesWrapper.languageRules
             ),
             cacheDBIDWrapper_: null//new Persistance.CacheDBIDWrapper(Program.cacheDB, jobId, JsonSerializer.Serialize(algorithmArgs))
          );
@@ -73,7 +73,8 @@ public class IPARandomChoiceLevenshteinAveragedPreset : IJobPreset
             ("config.txt", $"""
             job: phylogenetic-tree-ipa-random-choice
             
-            input-type-id: {getChapterConstruct.resourceId}
+            input-id: {getChapterConstruct.resourceId}
+            ipa-rules-id: {languageRulesWrapper.resourceId}
             book-idbs: {string.Join(", ", bookIDBs.Select(idb => idb.ToString()))}
             chapters: {string.Join(", ", chapters.Select(chap => chap.ToString()))}
             random-size: {this.randomSize}

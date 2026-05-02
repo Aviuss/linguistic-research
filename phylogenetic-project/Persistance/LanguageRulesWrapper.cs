@@ -3,9 +3,18 @@ using System.Text.Json;
 
 namespace phylogenetic_project.Persistance;
 
-public class GetLanguageRules
+public class LanguageRulesWrapper
 {
-    public static LanguageRules[] ReadFromFile(string filePath)
+    public string resourceId;
+    public LanguageRules[] languageRules;
+
+    public LanguageRulesWrapper(string filePath, string resourceId)
+    {
+        this.resourceId = resourceId;
+        languageRules = ReadFromFile(filePath);
+    }
+
+    private LanguageRules[] ReadFromFile(string filePath)
     {
         string json = File.ReadAllText(filePath);
 

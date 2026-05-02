@@ -20,7 +20,7 @@ public class IPAFirstSingularChoiceLevenshteinWithCusomIpaDistancePreset : IJobP
     private string outputResultPath = null!;
     private bool noPython = false;
     private ConcurrentDictionary<int, string>? mapIdbToName = null;
-    private LanguageRules[] listOfLanguageRules = null!;
+    private LanguageRulesWrapper languageRulesWrapper = null!;
     private IpaCustomLetterDistance ipaLetterDistanceDict = null!;
     // /int workers = 1; // 1 -> single threaded, >1 -> parallel
 
@@ -29,7 +29,7 @@ public class IPAFirstSingularChoiceLevenshteinWithCusomIpaDistancePreset : IJobP
         List<int> chapters,
         List<int> bookIDBs,
         string outputResultPath,
-        Persistance.LanguageRules[] listOfLanguageRules,
+        Persistance.LanguageRulesWrapper languageRulesWrapper,
         IpaCustomLetterDistance ipaLetterDistanceDict,
         bool noPython = false,
         ConcurrentDictionary<int, string>? mapIdbToName = null
@@ -39,7 +39,7 @@ public class IPAFirstSingularChoiceLevenshteinWithCusomIpaDistancePreset : IJobP
         this.chapters = chapters;
         this.bookIDBs = bookIDBs;
         this.outputResultPath = outputResultPath;
-        this.listOfLanguageRules = listOfLanguageRules;
+        this.languageRulesWrapper = languageRulesWrapper;
         this.noPython = noPython;
         this.mapIdbToName = mapIdbToName;
         this.ipaLetterDistanceDict = ipaLetterDistanceDict;
@@ -53,7 +53,7 @@ public class IPAFirstSingularChoiceLevenshteinWithCusomIpaDistancePreset : IJobP
             matrixCellChapterJob_: new Matrices.CellChapterJobs.IPAFirstSingularChoiceLevenshteinCellChapterJobWithCustomIpaDistance(
                 getChapterConstruct: getChapterConstruct,
                 ipaDistanceElement_: this.ipaLetterDistanceDict,
-                listOfLanguageRules: this.listOfLanguageRules
+                listOfLanguageRules: this.languageRulesWrapper.languageRules
             ),
             cacheDBIDWrapper_: null //new Persistance.CacheDBIDWrapper(Program.cacheDB, "aaaa TODO here", "")
          );
@@ -71,7 +71,9 @@ public class IPAFirstSingularChoiceLevenshteinWithCusomIpaDistancePreset : IJobP
             ("config.txt", $"""
             job: phylogenetic-tree-ipa-singular-choice w custom-ipa-distance
             
-            input-type-id: {getChapterConstruct.resourceId}
+            input-id: {getChapterConstruct.resourceId}
+            ipa-rules-id: {this.languageRulesWrapper.resourceId}
+            custom-ipa-distance: {this.ipaLetterDistanceDict.resourceId}
             book-idbs: {string.Join(", ", bookIDBs.Select(idb => idb.ToString()))}
             chapters: {string.Join(", ", chapters.Select(chap => chap.ToString()))}
             """)

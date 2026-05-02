@@ -7,11 +7,13 @@ namespace phylogenetic_project.Persistance;
 
 public class IpaCustomLetterDistance
 {
+    public string resourceId;
     private ConcurrentDictionary<(string, string), decimal> ipaLetterDistanceDict;
 
-    public IpaCustomLetterDistance(string path)
+    public IpaCustomLetterDistance(string path, string resourceId)
     {   
-        ipaLetterDistanceDict = ReadPhoneticCsv(path);
+        this.ipaLetterDistanceDict = ReadPhoneticCsv(path);
+        this.resourceId = resourceId;
     }
 
     public decimal this[string a, string b]

@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using Microsoft.Data.Sqlite;
 namespace phylogenetic_project.Persistance;
 
-public class Sadownikdb: IDisposable, IGetChapter
+public class GetChapterFromSqlite: IDisposable, IGetChapter
 {
     public string resourceId => _resourceId;
     private string _resourceId = null!;
@@ -16,7 +16,7 @@ public class Sadownikdb: IDisposable, IGetChapter
     private List<int> Chapters = [];
     
 
-    public Sadownikdb(string dbPath, string resourceId)
+    public GetChapterFromSqlite(string dbPath, string resourceId)
     {
         this._resourceId = resourceId;
 

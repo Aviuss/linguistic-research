@@ -7,14 +7,14 @@ using System.Text.Json;
 namespace phylogenetic_project.Persistance;
 
 
-public class FourPhrasesFromChapterOne : IGetChapter
+public class GetChapterFromJson : IGetChapter
 {
     public string resourceId => _resourceId;
     private string _resourceId = null!;
     
     private ConcurrentDictionary<(int, int), string> dictionary = new();
 
-    public FourPhrasesFromChapterOne(string dataPath, string resourceId)
+    public GetChapterFromJson(string dataPath, string resourceId)
     {
         this._resourceId = resourceId;
         string json = File.ReadAllText(dataPath);

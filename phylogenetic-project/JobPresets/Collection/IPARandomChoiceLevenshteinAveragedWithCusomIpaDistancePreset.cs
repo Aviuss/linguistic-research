@@ -19,32 +19,35 @@ public class IPARandomChoiceLevenshteinAveragedWithCusomIpaDistancePreset : IJob
     private string outputResultPath = null!;
     private bool noPython = false;
     private ConcurrentDictionary<int, string>? mapIdbToName = null;
-    private LanguageRules[] listOfLanguageRules = null!;
+    private LanguageRulesWrapper languageRulesWrapper = null!;
     private IpaCustomLetterDistance ipaLetterDistanceDict = null!;
     // /int workers = 1; // 1 -> single threaded, >1 -> parallel
     private int randomSize = 10;
+    private CacheDB? cachedb = null;
 
     public IPARandomChoiceLevenshteinAveragedWithCusomIpaDistancePreset(
         IGetChapter getChapterConstruct,
         List<int> chapters,
         List<int> bookIDBs,
         string outputResultPath,
-        Persistance.LanguageRules[] listOfLanguageRules,
+        Persistance.LanguageRulesWrapper languageRulesWrapper,
         IpaCustomLetterDistance ipaLetterDistanceDict,
         int randomSize,
         bool noPython = false,
-        ConcurrentDictionary<int, string>? mapIdbToName = null
+        ConcurrentDictionary<int, string>? mapIdbToName = null,
+        CacheDB? cachedb = null
     )
     {
         this.getChapterConstruct = getChapterConstruct;
         this.chapters = chapters;
         this.bookIDBs = bookIDBs;
         this.outputResultPath = outputResultPath;
-        this.listOfLanguageRules = listOfLanguageRules;
+        this.languageRulesWrapper = languageRulesWrapper;
         this.noPython = noPython;
         this.mapIdbToName = mapIdbToName;
         this.ipaLetterDistanceDict = ipaLetterDistanceDict;
         this.randomSize = randomSize;
+        this.cachedb = cachedb;
     }
 
     public void Start()
@@ -59,16 +62,18 @@ public class IPARandomChoiceLevenshteinAveragedWithCusomIpaDistancePreset : IJob
                 randomSize_: this.randomSize,
                 ipaDistanceElement_: this.ipaLetterDistanceDict,
                 parallelExecution_: 1,
-                listOfLanguageRules: this.listOfLanguageRules
+                listOfLanguageRules: this.languageRulesWrapper.languageRules
             ),
-            cacheDBIDWrapper_: null//new Persistance.CacheDBIDWrapper(Program.cacheDB, jobId, JsonSerializer.Serialize(algorithmArgs))
+            cacheDBIDWrapper_: new Persistance.CacheDBIDWrapper(
+                this.cachedb,
+                "phylogenetic-tree-ipa-random-choice w custom-ipa-distance",
+                $"""randomSize: {this.randomSize}; input-id: {this.getChapterConstruct.resourceId}; ipa-rules-id: {languageRulesWrapper.resourceId}; custom-ipa-distance: {this.ipaLetterDistanceDict.resourceId}"""
+            )
         );
 
         _ = levenshteinMatrix.CalculateResultMatrix();
 
         Console.WriteLine(levenshteinMatrix.ToString());
-
-        if (Program.dontCreateDataInTemporaryFolder) { return; }
 
         StaticMethods.SaveTemporaryResults.Save(this.outputResultPath, new (string, string)[]
         {
@@ -76,7 +81,9 @@ public class IPARandomChoiceLevenshteinAveragedWithCusomIpaDistancePreset : IJob
             ("config.txt", $"""
             job: phylogenetic-tree-ipa-random-choice w custom-ipa-distance
             
-            input-type-id: {getChapterConstruct.resourceId}
+            input-id: {getChapterConstruct.resourceId}
+            ipa-rules-id: {languageRulesWrapper.resourceId}
+            custom-ipa-distance: {this.ipaLetterDistanceDict.resourceId}
             book-idbs: {string.Join(", ", bookIDBs.Select(idb => idb.ToString()))}
             chapters: {string.Join(", ", chapters.Select(chap => chap.ToString()))}
             random-size: {this.randomSize}

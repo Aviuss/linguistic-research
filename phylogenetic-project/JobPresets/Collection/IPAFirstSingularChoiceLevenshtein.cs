@@ -19,14 +19,14 @@ public class IPAFirstSingularChoiceLevenshtein : IJobPreset
     private string outputResultPath = null!;
     private bool noPython = false;
     private ConcurrentDictionary<int, string>? mapIdbToName = null;
-    private Persistance.LanguageRules[] listOfLanguageRules = null!;
+    private Persistance.LanguageRulesWrapper languageRulesWrapper = null!;
 
     public IPAFirstSingularChoiceLevenshtein(
         IGetChapter getChapterConstruct,
         List<int> chapters,
         List<int> bookIDBs,
         string outputResultPath,
-        Persistance.LanguageRules[] listOfLanguageRules,
+        Persistance.LanguageRulesWrapper languageRulesWrapper,
         bool noPython = false,
         ConcurrentDictionary<int, string>? mapIdbToName = null
     )
@@ -35,7 +35,7 @@ public class IPAFirstSingularChoiceLevenshtein : IJobPreset
         this.chapters = chapters;
         this.bookIDBs = bookIDBs;
         this.outputResultPath = outputResultPath;
-        this.listOfLanguageRules = listOfLanguageRules;
+        this.languageRulesWrapper = languageRulesWrapper;
         this.noPython = noPython;
         this.mapIdbToName = mapIdbToName;
     }
@@ -45,7 +45,7 @@ public class IPAFirstSingularChoiceLevenshtein : IJobPreset
         var levenshteinMatrix = new Matrices.BookMatrix<Matrices.CellChapterJobs.LevenshteinIndividualDataInt>(
             bookIDBs_: bookIDBs,
             chapters_: chapters,
-            matrixCellChapterJob_: new Matrices.CellChapterJobs.IPAFirstSingularChoiceLevenshteinCellChapterJob(getChapterConstruct, this.listOfLanguageRules)
+            matrixCellChapterJob_: new Matrices.CellChapterJobs.IPAFirstSingularChoiceLevenshteinCellChapterJob(getChapterConstruct, this.languageRulesWrapper.languageRules)
          );
 
         _ = levenshteinMatrix.CalculateResultMatrix();
@@ -58,7 +58,8 @@ public class IPAFirstSingularChoiceLevenshtein : IJobPreset
             ("config.txt", $"""
             job: phylogenetic-tree-ipa-singular-choice
             
-            input-type-id: {getChapterConstruct.resourceId}
+            input-id: {getChapterConstruct.resourceId}
+            ipa-rules-id: {languageRulesWrapper.resourceId}
             book-idbs: {string.Join(", ", bookIDBs.Select(idb => idb.ToString()))}
             chapters: {string.Join(", ", chapters.Select(chap => chap.ToString()))}
             """)

@@ -10,25 +10,8 @@ namespace phylogenetic_project;
 
 public class Program
 {
-    public static readonly string projectPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..");
-    public static readonly string dataAndResultsPath = Path.Combine(projectPath, @"data and results");
-
-    public static Persistance.Sadownikdb sadownikdb = null!;
-    public static Persistance.FourPhrasesFromChapterOne fourPhrasesFromChapterOne = null!;
-    public static Persistance.CacheDB? cacheDB;
-    public static ConcurrentDictionary<int, string> mapIdbToName = null!;
-    public static List<Persistance.LanguageRules> listOfLanguageRules = null!;
-
-    public static bool doParallelIfPossible = false;
-    public static bool showProgressBar = false;
-
-
     public static List<Process> runningProcesses = new();
     public static CancellationTokenSource cts = new();
-    public static bool dontCreateDataInTemporaryFolder = false;
-
-    public static IpaCustomLetterDistance? ipaLetterDistanceDict;
-
     public static ConfigSingelton config = ConfigSingelton.Instance;
 
     static void Main(string[] args)
@@ -89,19 +72,6 @@ public class Program
         {
             KillAllProcesses();
         };
-    }
-
-    static void LoadDataAndConfigAndCache()
-    {        
-
-        //mapIdbToName = Persistance.MapIdbToName.ReadFromFile();
-        //listOfLanguageRules = Persistance.GetLanguageRules.ReadFromFile();
-
-        cacheDB = new Persistance.CacheDB(
-            dbPath: Path.Combine(dataAndResultsPath, "cache/cache.sqlite")
-        );
-
-        //ipaLetterDistanceDict = new Persistance.IpaLetterDistance(Path.Combine(dataAndResultsPath, "json settings", "ipa_letter_distance.csv"));
     }
 
     static void KillAllProcesses()
