@@ -195,9 +195,18 @@ public sealed class ConfigSingelton
                         mapIdbToName: mapIdbToName
                     );    
 
-                } else
-                {
-                    throw new NotImplementedException(job);    
+                } else {
+                    this.jobPreset = new JobPresets.Collection.IPARandomChoiceLevenshteinAveragedWithCusomIpaDistancePreset(
+                        getChapterConstruct: this.inputStruct,
+                        chapters: this.chapters,
+                        bookIDBs: this.bookIdbs,
+                        outputResultPath: Path.Combine(this.outputFolderPath, "results", "phylogenetic-tree-ipa-random-choice", timeNow),
+                        listOfLanguageRules: this.listOfLanguageRules,
+                        ipaLetterDistanceDict: this.ipaCustomLetterDistanceDict,
+                        randomSize: this.randomIpaIterations.Value,
+                        noPython: this.noPython,
+                        mapIdbToName: mapIdbToName
+                    ); 
                 }
                 return;
 
