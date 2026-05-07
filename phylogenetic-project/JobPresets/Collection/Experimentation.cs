@@ -41,21 +41,16 @@ public class Experimentation: IJobPreset
     public void Start()
     {
         Console.WriteLine("Experiment!");
-
-        for (int idx_idb1 = 0; idx_idb1 < bookIDBs.Count; idx_idb1++)
+        
+        for (int idx_chapter = 0; idx_chapter < chapters.Count; idx_chapter++)
         {
-            for (int idx_idb2 = idx_idb1 + 1; idx_idb2 < bookIDBs.Count; idx_idb2++)
-            {
-                for (int idx_chapter = 0; idx_chapter < chapters.Count; idx_chapter++)
-                {
-                    processChapter(bookIDBs[idx_idb1], bookIDBs[idx_idb2], chapters[idx_chapter]);                
-                }
-            }
+            processChapter(chapters[idx_chapter]);                
         }
 
         this.listOfCliques = this.listOfCliques
             .Distinct()
             .OrderByDescending(e => e.Count)
+            .Where(e => e.Count > 9) // for less results | ONLY TEST
             .ToList();
 
         foreach (var clique in this.listOfCliques)
@@ -68,34 +63,28 @@ public class Experimentation: IJobPreset
 
     
 
-    private void processChapter(int idb1, int idb2, int chapter)
+    private void processChapter(int chapter)
     {
-        List<Element> elements = getChapterConstruct.GetChapter(idb1, chapter)
-            .Split(null)
-            .Where(e => e.Length > 0)
-            .Select(e => e.ToLowerInvariant())
-            .Distinct()
-            .Select(e => new Element(e, idb1))
-            .Concat(
-                getChapterConstruct.GetChapter(idb2, chapter)
+        List<Element> elements = [];
+        for (int idx_idb = 0; idx_idb < this.bookIDBs.Count; idx_idb++)
+        {
+            int idb1 = this.bookIDBs[idx_idb];
+            
+            elements.AddRange(
+                getChapterConstruct.GetChapter(idb1, chapter)
+                    .ToLowerInvariant()
                     .Split(null)
                     .Where(e => e.Length > 0)
-                    .Select(e => e.ToLowerInvariant())
                     .Distinct()
-                    .Select(e => new Element(e, idb2))
-            ).ToList();
- 
+                    .Select(e => new Element(e, idb1))
+            ); 
+        }
         
         if (elements.Count == 0)
             return;
 
         
         var finder = new phylogenetic_project.Algorithms.CliqueFinder<Element>();
-        Persistance.LanguageRules? ipaRule_idb1 = Array.Find(this.languageRulesWrapper.languageRules, element => element.IdbCompatible.Contains(idb1));
-        ArgumentNullException.ThrowIfNull(ipaRule_idb1);
-        Persistance.LanguageRules? ipaRule_idb2 = Array.Find(this.languageRulesWrapper.languageRules, element => element.IdbCompatible.Contains(idb2));
-        ArgumentNullException.ThrowIfNull(ipaRule_idb2);
-
 
         for (int i1 = 0; i1 < elements.Count; i1++)
         {
@@ -103,6 +92,12 @@ public class Experimentation: IJobPreset
             {
                 Element e1 = elements[i1];
                 Element e2 = elements[i2];
+
+                Persistance.LanguageRules? ipaRule_idb1 = Array.Find(this.languageRulesWrapper.languageRules, element => element.IdbCompatible.Contains(e1.idb));
+                ArgumentNullException.ThrowIfNull(ipaRule_idb1);
+                Persistance.LanguageRules? ipaRule_idb2 = Array.Find(this.languageRulesWrapper.languageRules, element => element.IdbCompatible.Contains(e2.idb));
+                ArgumentNullException.ThrowIfNull(ipaRule_idb2);
+
 
                 var ipaText_idb1 = StaticMethods.IPA.ConvertToIpa(
                     e1.text,
@@ -133,11 +128,10 @@ public class Experimentation: IJobPreset
 
         foreach (var clique in finder.FindAllCliques())
         {
-            var clique2 = clique.Distinct();
-            int distinct = clique2.Select(e => e.idb).Distinct().Count();
+            int distinct = clique.Select(e => e.idb).Distinct().Count();
             if (distinct > 1)
             {
-                listOfCliques.Add(clique2.ToList());
+                listOfCliques.Add(clique.ToList());
             }
         }
             
