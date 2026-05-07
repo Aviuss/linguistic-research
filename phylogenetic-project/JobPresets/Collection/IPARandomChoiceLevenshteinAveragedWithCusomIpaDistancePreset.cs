@@ -113,7 +113,7 @@ public class IPARandomChoiceLevenshteinAveragedWithCusomIpaDistancePreset : IJob
                 }).ToList()
             };
             StaticMethods.Python.CallPythonScript(
-                "create_nj_newick.py",
+                Path.Combine("..", "python-scripts", "create_nj_newick.py"),
                 new string[] { JsonSerializer.Serialize(pyDataNewick, new JsonSerializerOptions { WriteIndented = true }) }
             );
             
@@ -123,7 +123,7 @@ public class IPARandomChoiceLevenshteinAveragedWithCusomIpaDistancePreset : IJob
                 newickFormat = File.ReadAllText(Path.Combine(this.outputResultPath, "newick.txt"))
             };
             StaticMethods.Python.CallPythonScript(
-                Path.Combine(this.outputResultPath, "create_linguistic_trees.py"),
+                Path.Combine("..", "python-scripts", "create_linguistic_trees.py"),
                 new string[] { JsonSerializer.Serialize(pyDataGraph, new JsonSerializerOptions { WriteIndented = true }) }
             );
         }

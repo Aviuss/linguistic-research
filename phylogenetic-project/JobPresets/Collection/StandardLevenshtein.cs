@@ -62,29 +62,29 @@ public class StandardLevenshtein : IJobPreset
                 """)
             ]
         );
-        
-        var pyDataNewick = new
-        {
-            save_path_newick = Path.Combine(this.outputResultPath, "newick.txt"),
-            inputmatrix = levenshteinMatrix.ConvertResultToLowerTriangularMatrix(),
-            names = bookIDBs.Select(element =>
-            {
-                if (this.mapIdbToName != null && this.mapIdbToName.TryGetValue(element, out string? value))
-                {
-                    if (value != null)
-                    {
-                        return value;
-                    }
-                }
-
-                return "idb_" + element.ToString();
-            }).ToList()
-        };
 
         if (!noPython)
-        {        
+        { 
+            var pyDataNewick = new
+            {
+                save_path_newick = Path.Combine(this.outputResultPath, "newick.txt"),
+                inputmatrix = levenshteinMatrix.ConvertResultToLowerTriangularMatrix(),
+                names = bookIDBs.Select(element =>
+                {
+                    if (this.mapIdbToName != null && this.mapIdbToName.TryGetValue(element, out string? value))
+                    {
+                        if (value != null)
+                        {
+                            return value;
+                        }
+                    }
+
+                    return "idb_" + element.ToString();
+                }).ToList()
+            };
+                
             StaticMethods.Python.CallPythonScript(
-                "create_nj_newick.py",
+                Path.Combine("..", "python-scripts", "create_nj_newick.py"),
                 new string[] { JsonSerializer.Serialize(pyDataNewick, new JsonSerializerOptions { WriteIndented = true }) }
             );
             
@@ -94,9 +94,9 @@ public class StandardLevenshtein : IJobPreset
                 newickFormat = File.ReadAllText(Path.Combine(this.outputResultPath, "newick.txt"))
             };
             StaticMethods.Python.CallPythonScript(
-                Path.Combine(this.outputResultPath, "create_linguistic_trees.py"),
+                Path.Combine("..", "python-scripts", "create_linguistic_trees.py"),
                 new string[] { JsonSerializer.Serialize(pyDataGraph, new JsonSerializerOptions { WriteIndented = true }) }
-            );   
+            );
         }
     }
 }

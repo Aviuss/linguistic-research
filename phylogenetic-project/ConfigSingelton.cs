@@ -217,7 +217,7 @@ public sealed class ConfigSingelton
                         getChapterConstruct: this.inputStruct,
                         chapters: this.chapters,
                         bookIDBs: this.bookIdbs,
-                        outputResultPath: Path.Combine(this.outputFolderPath, "results", "phylogenetic-tree-ipa-random-choice", timeNow),
+                        outputResultPath: Path.Combine(this.outputFolderPath, "results", "phylogenetic-tree-ipa-random-choice w custom-ipa-distance", timeNow),
                         languageRulesWrapper: this.languageRulesWrapper,
                         ipaLetterDistanceDict: this.ipaCustomLetterDistanceDict,
                         randomSize: this.randomIpaIterations.Value,
