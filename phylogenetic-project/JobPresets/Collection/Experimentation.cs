@@ -47,11 +47,17 @@ public class Experimentation: IJobPreset
             processChapter(chapters[idx_chapter]);                
         }
 
-        this.listOfCliques = this.listOfCliques
-            .Distinct()
+        this.listOfCliques = this.listOfCliques.Distinct(new ListElementComparer()).ToList();
+        this.listOfCliques = RemoveSubsets(this.listOfCliques)
             .OrderByDescending(e => e.Count)
-            .Where(e => e.Count > 9) // for less results | ONLY TEST
             .ToList();
+
+        // how to fix partially duplicate lists?
+        // for each list<Element>
+        //     take first element of that list and compare it to every other list<Element>
+        //     if match then do some more professional merging (creates clique for it and evaulates it)
+        // note: that wouldn't be best because first element may be the most weird one
+        // but.. is it even a good idea? kinda yeah, but we can do some weird matching, and it would loose point of chapter to chapter (performance increase but still)
 
         foreach (var clique in this.listOfCliques)
         {
@@ -60,7 +66,6 @@ public class Experimentation: IJobPreset
 
 
     }
-
     
 
     private void processChapter(int chapter)
@@ -135,7 +140,31 @@ public class Experimentation: IJobPreset
             }
         }
             
-
-
     }
+
+    private static List<List<Element>> RemoveSubsets(List<List<Element>> lists)
+    {
+        var sets = lists
+            .Select(l => (Original: l, Set: new HashSet<Element>(l)))
+            .ToList();
+
+        return sets
+            .Where(candidate => !sets.Any(other =>
+                other.Set.Count > candidate.Set.Count &&
+                candidate.Set.IsSubsetOf(other.Set)))
+            .Select(x => x.Original)
+            .ToList();
+    }
+
+    private class ListElementComparer : IEqualityComparer<List<Element>>
+    {
+        public bool Equals(List<Element>? x, List<Element>? y) =>
+            x != null && y != null &&
+            x.OrderBy(e => e.idb).SequenceEqual(y.OrderBy(e => e.idb));
+
+        public int GetHashCode(List<Element> obj) =>
+            obj.OrderBy(e => e.idb)
+            .Aggregate(0, (hash, e) => HashCode.Combine(hash, e.GetHashCode()));
+    }
+
 }
