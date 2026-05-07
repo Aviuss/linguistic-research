@@ -43,6 +43,7 @@ required parameters:
 optional parameters:
 - `--custom-ipa-distance [path]`
 - `--custom-ipa-distance-id [string]` identifier for the resource (used mainly in valid caching)
+- `--parallel-workers [int]` works only for random choice job (second). It parallelizes the work across X workers. Default is 1.
 
 ### 3. Required params for phylogenetic tree generation
 
@@ -80,7 +81,7 @@ C# code executes some python scripts to generate graphs and some python implemen
 
 Maps `idb`s to more human readable names.
 
-#### 4.3 `-cache-path [path]`
+#### 4.3 `--cache-path [path]`
 
 If not present, it will be created.
 

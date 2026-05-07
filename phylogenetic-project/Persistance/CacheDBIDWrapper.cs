@@ -9,7 +9,7 @@ public class CacheDBIDWrapper
 
     public CacheDB? cacheDB;
 
-    public CacheDBIDWrapper(CacheDB? cacheDB_, string algorithmName_, string algorithmArgs_)
+    public CacheDBIDWrapper(CacheDB cacheDB_, string algorithmName_, string algorithmArgs_)
     {
         cacheDB = cacheDB_;
         algorithmName = algorithmName_;

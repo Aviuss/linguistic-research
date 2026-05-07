@@ -22,29 +22,26 @@ public class Program
             Console.WriteLine("DEVELOPMENT ARGS INJECTION");
             args = @"
                 --job phylogenetic-tree-ipa-random-choice
-                
-                --input-type sql
-                --input-type-path ../../../../input_data/SadownikDB.sqlite
-                --input-type-id sadownikdb
-
+                --input-type sql --input-type-path ../../../../input_data/SadownikDB.sqlite --input-type-id sadownikdb
                 --output-folder-path ../../../../output_data/
-
                 --book-idbs 29,28,44,43,39,38,37,46,36,33,42
-                --chapters 1
+                --chapters 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28
+                --ipa-rules ../../../../input_data/ipa_rules.json --ipa-rules-id ipa_rules_1
+                --custom-ipa-distance ../../../../input_data/ipa_letter_distance.csv --custom-ipa-distance-id custom-ipa-distance-1
                 --map-idb-to-name ../../../../input_data/map_idb_to_name.json
-                --ipa-rules ../../../../input_data/ipa_rules.json
+                --random-ipa-iterations 10
+                --parallel-workers 16
                 --no-python
-                --random-ipa-iterations 5
+                --cache-path ../../../../output_data/cache/cache1.sqlite
                 ".Split(" ").Select(x => x.Trim()).Where(x => x.Length > 0).ToArray();
         }
 
-        Console.WriteLine(args);
         config.PassArgs(args);
 
         RegisterShutdownHandlers();
         //LoadDataAndConfigAndCache();
 
-        Console.WriteLine("Welcome to phylogenetic project, where research paper is being created in the Poznan University of Technology!");
+        Console.WriteLine("\n\nWelcome to phylogenetic project, where research paper is being created in the Poznan University of Technology!\n");
 
         if (config.jobPreset == null)
         {

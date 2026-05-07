@@ -58,9 +58,7 @@ input_data/SadownikDB.sqlite
 input_data/four_phrases.json
 input_data/chapter_16_sentence_maching.json
 
-output_data/cache/cache.sqlite
-output_data/cache/cache.sqlite-shm
-output_data/cache/cache.sqlite-wal
+output_data/cache/*
 output_data/results/*
 
 .vs/

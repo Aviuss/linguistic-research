@@ -24,6 +24,7 @@ public class IPARandomChoiceLevenshteinAveragedWithCusomIpaDistancePreset : IJob
     // /int workers = 1; // 1 -> single threaded, >1 -> parallel
     private int randomSize = 10;
     private CacheDB? cachedb = null;
+    private uint parallelExecution = 1;
 
     public IPARandomChoiceLevenshteinAveragedWithCusomIpaDistancePreset(
         IGetChapter getChapterConstruct,
@@ -33,6 +34,7 @@ public class IPARandomChoiceLevenshteinAveragedWithCusomIpaDistancePreset : IJob
         Persistance.LanguageRulesWrapper languageRulesWrapper,
         IpaCustomLetterDistance ipaLetterDistanceDict,
         int randomSize,
+        uint parallelExecution = 1,
         bool noPython = false,
         ConcurrentDictionary<int, string>? mapIdbToName = null,
         CacheDB? cachedb = null
@@ -48,6 +50,7 @@ public class IPARandomChoiceLevenshteinAveragedWithCusomIpaDistancePreset : IJob
         this.ipaLetterDistanceDict = ipaLetterDistanceDict;
         this.randomSize = randomSize;
         this.cachedb = cachedb;
+        this.parallelExecution = parallelExecution;
     }
 
     public void Start()
@@ -61,10 +64,10 @@ public class IPARandomChoiceLevenshteinAveragedWithCusomIpaDistancePreset : IJob
                 getChapterConstruct: getChapterConstruct,
                 randomSize_: this.randomSize,
                 ipaDistanceElement_: this.ipaLetterDistanceDict,
-                parallelExecution_: 1,
+                parallelExecution_: this.parallelExecution,
                 listOfLanguageRules: this.languageRulesWrapper.languageRules
             ),
-            cacheDBIDWrapper_: new Persistance.CacheDBIDWrapper(
+            cacheDBIDWrapper_: this.cachedb == null ? null : new Persistance.CacheDBIDWrapper(
                 this.cachedb,
                 "phylogenetic-tree-ipa-random-choice w custom-ipa-distance",
                 $"""randomSize: {this.randomSize}; input-id: {this.getChapterConstruct.resourceId}; ipa-rules-id: {languageRulesWrapper.resourceId}; custom-ipa-distance: {this.ipaLetterDistanceDict.resourceId}"""

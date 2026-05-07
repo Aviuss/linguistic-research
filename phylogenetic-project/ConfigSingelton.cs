@@ -20,6 +20,7 @@ public sealed class ConfigSingelton
     private string? inputType = null;
     private string? inputTypePath = null;
     private string? inputTypeId = null;
+    private uint parallelWorkers = 1;
 
     private ConcurrentDictionary<int, string>? mapIdbToName = null;
     private LanguageRulesWrapper? languageRulesWrapper = null;
@@ -55,6 +56,7 @@ public sealed class ConfigSingelton
                 .SupportsOption<string>("custom-ipa-distance-id", "Id for custom ipa distance")
                 .SupportsOption<string>("map-idb-to-name", "Path to map to idb json file")
                 .SupportsOption<int>("random-ipa-iterations", "Number of iterations for random iteration job")
+                .SupportsOption<uint>("parallel-workers", "Number of parallel executions. Default is 1.", 1)
                 .SupportsFlag("no-python", "Disables python scripts")
                 .Parse();
             
@@ -77,19 +79,20 @@ public sealed class ConfigSingelton
             instance.chapters = parser.GetOption<string>("chapters").Split(",").Select(x => Int32.Parse(x)).ToList();
             instance.chapters.Sort();
             instance.noPython = parser.IsFlagProvided("no-python");
+            instance.parallelWorkers = parser.GetOption<uint>("--parallel-workers");
             
             string? ipaRulesPath = parser.GetOption<string>("ipa-rules");
             string? ipaRulesId = parser.GetOption<string>("ipa-rules-id");    
             if (ipaRulesPath != null && ipaRulesId != null)
             {
-                this.languageRulesWrapper = new Persistance.LanguageRulesWrapper(ipaRulesPath, ipaRulesId);
+                instance.languageRulesWrapper = new Persistance.LanguageRulesWrapper(ipaRulesPath, ipaRulesId);
             }
 
             string? customIpaDistancePath = parser.GetOption<string>("custom-ipa-distance");
             string? customIpaDistanceId = parser.GetOption<string>("custom-ipa-distance-id");
             if (customIpaDistancePath != null && customIpaDistanceId != null)
             {
-                this.ipaCustomLetterDistanceDict = new Persistance.IpaCustomLetterDistance(customIpaDistancePath, customIpaDistanceId);
+                instance.ipaCustomLetterDistanceDict = new Persistance.IpaCustomLetterDistance(customIpaDistancePath, customIpaDistanceId);
             }
 
             string? mapIdbToNameFilePath = parser.GetOption<string>("map-idb-to-name");
@@ -98,10 +101,10 @@ public sealed class ConfigSingelton
                 instance.mapIdbToName = Persistance.MapIdbToName.ReadFromFile(mapIdbToNameFilePath);
             }
 
-            this.randomIpaIterations = parser.GetOption<int>("random-ipa-iterations");
-            if (this.randomIpaIterations == 0)
+            instance.randomIpaIterations = parser.GetOption<int>("random-ipa-iterations");
+            if (instance.randomIpaIterations == 0)
             {
-                this.randomIpaIterations = null;
+                instance.randomIpaIterations = null;
             }
 
             string? cacheDbPath = parser.GetOption<string>("cache-path");
@@ -218,8 +221,10 @@ public sealed class ConfigSingelton
                         languageRulesWrapper: this.languageRulesWrapper,
                         ipaLetterDistanceDict: this.ipaCustomLetterDistanceDict,
                         randomSize: this.randomIpaIterations.Value,
+                        parallelExecution: this.parallelWorkers,
                         noPython: this.noPython,
-                        mapIdbToName: mapIdbToName
+                        mapIdbToName: mapIdbToName,
+                        cachedb: this.cachedb
                     ); 
                 }
                 return;
