@@ -8,14 +8,11 @@ using System.Threading.Tasks;
 namespace phylogenetic_project.StaticMethods;
 public class Python
 {
-    public static readonly string pythonScriptsPath = Path.Combine(Program.projectPath, @"python-scripts");
-
-
-    public static void CallPythonScript(string scriptName, string[]? arguments = null)
+    public static void CallPythonScript(string filePath, string[]? arguments = null)
     {
         ProcessStartInfo start = new ProcessStartInfo();
         start.FileName = "python";
-        start.ArgumentList.Add(Path.Combine(pythonScriptsPath, scriptName));
+        start.ArgumentList.Add(filePath);
 
         for (int i = 0; arguments != null && i < arguments.Length; i++)
         {

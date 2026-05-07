@@ -234,6 +234,7 @@ public class BookMatrix<T_FieldData>
         return nowDone;
     }
 
+    /*
     private Task RunParallelProcess(string arguments)
     {
         return Task.Run(() =>
@@ -271,6 +272,7 @@ public class BookMatrix<T_FieldData>
 
             });
     }
+    */
 
     public int MaxNumberOfIterationToPerform()
     {

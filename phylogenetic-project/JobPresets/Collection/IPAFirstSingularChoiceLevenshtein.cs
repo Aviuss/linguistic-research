@@ -95,7 +95,7 @@ public class IPAFirstSingularChoiceLevenshtein : IJobPreset
                 newickFormat = File.ReadAllText(Path.Combine(this.outputResultPath, "newick.txt"))
             };
             StaticMethods.Python.CallPythonScript(
-                "create_linguistic_trees.py",    
+                Path.Combine(this.outputResultPath, "create_linguistic_trees.py"),
                 new string[] { JsonSerializer.Serialize(pyDataGraph, new JsonSerializerOptions { WriteIndented = true }) }
             );
 

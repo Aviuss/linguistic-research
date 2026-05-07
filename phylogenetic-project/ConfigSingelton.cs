@@ -82,7 +82,7 @@ public sealed class ConfigSingelton
             string? ipaRulesId = parser.GetOption<string>("ipa-rules-id");    
             if (ipaRulesPath != null && ipaRulesId != null)
             {
-                this.languageRulesWrapper = new Persistance.LanguageRulesWrapper(ipaRulesId, ipaRulesId);
+                this.languageRulesWrapper = new Persistance.LanguageRulesWrapper(ipaRulesPath, ipaRulesId);
             }
 
             string? customIpaDistancePath = parser.GetOption<string>("custom-ipa-distance");
