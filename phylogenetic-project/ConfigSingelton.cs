@@ -231,12 +231,14 @@ public sealed class ConfigSingelton
 
             case "experimentation":
                 ArgumentNullException.ThrowIfNull(this.languageRulesWrapper);
+                ArgumentNullException.ThrowIfNull(this.ipaCustomLetterDistanceDict);
 
                 this.jobPreset = new phylogenetic_project.JobPresets.Collection.Experimentation(
                     getChapterConstruct: this.inputStruct,
                     chapters: this.chapters,
                     bookIDBs: this.bookIdbs,
                     languageRulesWrapper: this.languageRulesWrapper,
+                    ipaLetterDistanceDict: this.ipaCustomLetterDistanceDict,
                     threshold: (decimal)0.8
                 );
                 return;

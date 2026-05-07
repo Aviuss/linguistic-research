@@ -10,12 +10,15 @@ public class Experimentation: IJobPreset
     private List<int> chapters;
     private List<int> bookIDBs;
     private Persistance.LanguageRulesWrapper languageRulesWrapper;
+    private IpaCustomLetterDistance ipaLetterDistanceDict;
+
     private decimal threshold; //values should be >= than this
     public Experimentation(
         IGetChapter getChapterConstruct,
         List<int> chapters,
         List<int> bookIDBs,
         Persistance.LanguageRulesWrapper languageRulesWrapper,
+        IpaCustomLetterDistance ipaLetterDistanceDict,
         decimal threshold
     )
     {
@@ -24,6 +27,7 @@ public class Experimentation: IJobPreset
         this.bookIDBs = bookIDBs;
         this.languageRulesWrapper = languageRulesWrapper;
         this.threshold = threshold;
+        this.ipaLetterDistanceDict = ipaLetterDistanceDict;
     }
 
     public void Start()
@@ -75,30 +79,58 @@ public class Experimentation: IJobPreset
         string[] textSplitted1 = getChapterConstruct.GetChapter(idb1, chapter).Split(null).Distinct().ToArray();
         string[] textSplitted2 = getChapterConstruct.GetChapter(idb2, chapter).Split(null).Distinct().ToArray();
         
-        var similarityMatrix = new decimal[textSplitted1.Length, textSplitted2.Length];
+        long totalLength = textSplitted1.Length + textSplitted2.Length;
+
+        var similarityMatrix = new decimal[totalLength, totalLength];
         // 0  -> most different
         // 1  -> most similar (same)
         // -1 -> used
         
-        for (int idx_txt_1 = 0; idx_txt_1 < textSplitted1.Length; idx_txt_1++)
+
+        var finder = new phylogenetic_project.Algorithms.CliqueFinder();
+        
+        for (int i1 = 0; i1 < totalLength; i1++)
         {
-            for (int idx_txt_2 = 0; idx_txt_2 < textSplitted2.Length; idx_txt_2++)
+            for (int i2 = i1+1; i2 < totalLength; i2++)
             {
-                var a = textSplitted1[idx_txt_1];
-                var b = textSplitted2[idx_txt_2];
-                var value = 1 - (decimal)Algorithms.Levenshtein.Distance(a, b) / Math.Max(a.Length, b.Length);
-                similarityMatrix[idx_txt_1, idx_txt_2] = value;
+                string text_1;
+                if (i1 < textSplitted1.Length)
+                {
+                    text_1 = textSplitted1[i1];
+                } else
+                {
+                    text_1 = textSplitted2[i1-textSplitted1.Length];
+                }
+                
+                string text_2;
+                if (i2 < textSplitted1.Length)
+                {
+                    text_2 = textSplitted1[i2];
+                } else
+                {
+                    text_2 = textSplitted2[i2-textSplitted1.Length];
+                }
+
+
+
+                var value = 1 - (decimal)Algorithms.Levenshtein.Distance(text_1, text_2) / Math.Max(text_1.Length, text_2.Length);
+                similarityMatrix[i1, i2] = value;
+                similarityMatrix[i2, i1] = value;
+
+                Console.WriteLine($"'{text_1}', '{text_2}', {value}");
+
+                if (value >= threshold)
+                {
+                    finder.AddEdge(i1, i2);
+                }
+
             }
         }
 
+        foreach (var clique in finder.FindAllCliques())
+            Console.WriteLine($"  [{string.Join(", ", clique)}]");
 
         List<Group> gr = new();
-
-        do
-        {
-            (int, int)? highestCoords = getHighestValue(similarityMatrix);
-            Console.WriteLine("aa");
-        } while (true);
 
     }
 
