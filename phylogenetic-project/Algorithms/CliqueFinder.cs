@@ -4,6 +4,7 @@ using System.Linq;
 
 namespace phylogenetic_project.Algorithms;
 
+
 class CliqueFinder<T> where T : notnull
 {
     private readonly Dictionary<T, HashSet<T>> _graph;
@@ -13,7 +14,6 @@ class CliqueFinder<T> where T : notnull
         _graph = new Dictionary<T, HashSet<T>>();
     }
 
-    // Add undirected edge between two T nodes
     public void Add((T, T) edge)
     {
         var (u, v) = edge;
@@ -23,9 +23,8 @@ class CliqueFinder<T> where T : notnull
         _graph[v].Add(u);
     }
 
-    // ─── Bron-Kerbosch with Pivot ────────────────────────────────────────────
 
-    public List<List<T>> FindAllMaximalCliques()
+    private List<List<T>> FindAllMaximalCliques()
     {
         var cliques = new List<List<T>>();
         var R = new HashSet<T>();
@@ -53,8 +52,11 @@ class CliqueFinder<T> where T : notnull
         {
             var neighbors = Neighbors(v);
 
+            var newR = new HashSet<T>(R);
+            newR.Add(v);
+
             BronKerbosch(
-                new HashSet<T>(R) { v },
+                newR,
                 new HashSet<T>(P.Intersect(neighbors)),
                 new HashSet<T>(X.Intersect(neighbors)),
                 cliques
@@ -64,49 +66,76 @@ class CliqueFinder<T> where T : notnull
             X.Add(v);
         }
     }
-
-    // ─── All cliques (including non-maximal subsets) ─────────────────────────
-
+    
     public List<List<T>> FindAllCliques()
     {
         var maximal = FindAllMaximalCliques();
-        var seen    = new HashSet<string>();
         var result  = new List<List<T>>();
 
         foreach (var clique in maximal)
+        {
             foreach (var subset in GetSubsets(clique))
-                if (subset.Count >= 2)
-                {
-                    var key = string.Join(",", subset.Select(n => n.ToString()).OrderBy(x => x));
-                    if (seen.Add(key))
-                        result.Add(subset);
-                }
+            {
+                if (subset.Count <= 1)
+                    continue;
 
-        return result.OrderBy(c => c.Count).ToList();
+                subset.Sort();
+                bool cliqueIsInResult = false;
+                
+                foreach (var res in result)
+                {
+                    if (res.Count != subset.Count)
+                        continue;
+
+                    for (int i = 0; i < subset.Count; i++)
+                    {
+                        if (!EqualityComparer<T>.Default.Equals(subset[i], res[i]))
+                        {
+                            cliqueIsInResult = true;
+                            break;
+                        }
+                    }
+
+                    if (cliqueIsInResult)
+                    {
+                        break;
+                    }
+
+                }
+                
+                if (!cliqueIsInResult)
+                    result.Add(subset);
+            
+            }
+        }       
+        return result.ToList();
     }
 
-    // ─── Maximum clique ───────────────────────────────────────────────────────
-
-    public List<T> FindMaximumClique() =>
-        FindAllMaximalCliques()
-            .OrderByDescending(c => c.Count)
-            .FirstOrDefault() ?? new List<T>();
-
-    // ─── Helpers ─────────────────────────────────────────────────────────────
-
-    private HashSet<T> Neighbors(T v) =>
-        _graph.TryGetValue(v, out var n) ? n : new HashSet<T>();
+    private HashSet<T> Neighbors(T v) {
+        HashSet<T>? n;
+        _graph.TryGetValue(v, out n);
+        ArgumentNullException.ThrowIfNull(n);
+        return n;
+    }
 
     private static IEnumerable<List<T>> GetSubsets(List<T> set)
     {
-        int n = set.Count;
-        for (int mask = 1; mask < (1 << n); mask++)
+        if (set.Count == 0)
         {
-            var subset = new List<T>();
-            for (int i = 0; i < n; i++)
-                if ((mask & (1 << i)) != 0)
-                    subset.Add(set[i]);
+            yield return new List<T>();
+            yield break;
+        }
+
+        T first = set[0];
+        List<T> rest = set.Skip(1).ToList();
+
+        foreach (var subset in GetSubsets(rest))
+        {
             yield return subset;
+
+            var withFirst = new List<T>(subset) { first };
+            yield return withFirst;
         }
     }
+
 }
