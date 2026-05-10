@@ -81,89 +81,117 @@ public class Experimentation: IJobPreset
         Console.WriteLine($"Len: {listOfCliques.Count}");
         foreach (var clique in listOfCliques.OrderByDescending(e => e.Count))
         {
-            Console.WriteLine($" [{string.Join(", ", clique)}]");    
+            Console.WriteLine($"[{string.Join(", ", clique.Select(e => $"({e.text}, {e.idb})") )}]\n");    
         }
     }
     
     private void MergeChapterCliques(List<List<Element>> listOfCliques)
     {
         List<bool> validMask = Enumerable.Repeat(true, listOfCliques.Count).ToList();
+        object maskLocker = new object();
+        List<List<Element>> addedNewElements = [];
+        object addLocker = new object();
 
-        for (int i = 0; i < listOfCliques.Count; i++)
-        {
-            if (validMask[i] == false)
-                continue;
 
-            for (int j = 0; j < listOfCliques.Count; j++)
+        Parallel.ForEach(
+            Enumerable.Range(0, listOfCliques.Count),
+            new ParallelOptions { MaxDegreeOfParallelism = this.parallelWorkers },
+            i =>
             {
-                if (validMask[i] == false)
-                    continue;
-                if (validMask[j] == false)
-                    continue;
-                if (i == j)
-                    continue;
+                bool validMask_i;
+                bool validMask_j;
 
-                var clique1 = listOfCliques[i];
-                var clique2 = listOfCliques[j];
-
-                var finder = new Algorithms.CliqueFinder<Element>();
+                lock (maskLocker) {
+                    validMask_i = validMask[i];    
+                }
                 
-                foreach (Element c1 in clique1)
-                {
-                    foreach (Element c2 in clique2)
-                    {
-                        if (c1 == c2)
-                            continue;
+                if (validMask_i == false)
+                    return;
 
-                        var sim = CalculateSimilarity(c1, c2);
-                        if (sim >= threshold)
-                        {
-                            finder.Add((c1, c2));
-                        }
-                    }
-                }
-
-                if (finder.GetGraphCount() > 0)
+                for (int j = 0; j < listOfCliques.Count; j++)
                 {
-                    for (int ii = 0; ii < clique1.Count; ii++)
-                    {
-                        for (int jj = 0; jj < clique1.Count; jj++)
-                        {
-                            if (ii != jj)
-                            {
-                                finder.Add((clique1[ii], clique1[jj]));
-                            }
-                        }   
+                    if (i == j)
+                        continue;
+
+                    lock (maskLocker) {
+                        validMask_i = validMask[i];
+                        validMask_j = validMask[j];    
                     }
+
+                    if (validMask_i == false)
+                        continue;
+                    if (validMask_j == false)
+                        continue;
+
+                    var clique1 = listOfCliques[i];
+                    var clique2 = listOfCliques[j];
+
+                    var finder = new Algorithms.CliqueFinder<Element>();
                     
-                    for (int ii = 0; ii < clique2.Count; ii++)
+                    foreach (Element c1 in clique1)
                     {
-                        for (int jj = 0; jj < clique2.Count; jj++)
+                        foreach (Element c2 in clique2)
                         {
-                            if (ii != jj)
+                            if (c1 == c2)
+                                continue;
+
+                            var sim = CalculateSimilarity(c1, c2);
+                            if (sim >= threshold)
                             {
-                                finder.Add((clique2[ii], clique2[jj]));
+                                finder.Add((c1, c2));
                             }
-                        }   
-                    }
-
-
-                    validMask[i] = false;
-                    validMask[j] = false;
-                    foreach (var clique in finder.FindAllMaximalCliques())
-                    {
-                        int distinct = clique.Select(e => e.idb).Distinct().Count();
-                        if (distinct > 1)
-                        {
-                            listOfCliques.Add(clique.ToList());
-                            validMask.Add(false);
                         }
                     }
 
-                }
+                    if (finder.GetGraphCount() > 0)
+                    {
+                        for (int ii = 0; ii < clique1.Count; ii++)
+                        {
+                            for (int jj = 0; jj < clique1.Count; jj++)
+                            {
+                                if (ii != jj)
+                                {
+                                    finder.Add((clique1[ii], clique1[jj]));
+                                }
+                            }   
+                        }
+                        
+                        for (int ii = 0; ii < clique2.Count; ii++)
+                        {
+                            for (int jj = 0; jj < clique2.Count; jj++)
+                            {
+                                if (ii != jj)
+                                {
+                                    finder.Add((clique2[ii], clique2[jj]));
+                                }
+                            }   
+                        }
 
+
+                        lock (maskLocker) {
+                            validMask[i] = false;
+                            validMask[j] = false;
+                        }
+                        
+                        foreach (var clique in finder.FindAllMaximalCliques())
+                        {
+                            int distinct = clique.Select(e => e.idb).Distinct().Count();
+                            if (distinct > 1)
+                            {
+                                lock (addedNewElements)
+                                {
+                                    addedNewElements.Add(clique.ToList());    
+                                }
+                            }
+                        }
+
+                    }
+
+                }
             }
-        }
+        );
+
+        listOfCliques.AddRange(addedNewElements);
     }
 
     private List<List<Element>> GetChapterCliques(int chapter)
