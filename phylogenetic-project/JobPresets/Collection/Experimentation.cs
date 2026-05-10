@@ -61,7 +61,6 @@ public class Experimentation: IJobPreset
 
 
         listOfCliques = listOfCliques.Distinct(new ListElementComparer()).ToList();
-        
         listOfCliques = RemoveSubsets(listOfCliques).ToList();
         
         int preLen;
@@ -71,11 +70,15 @@ public class Experimentation: IJobPreset
         {
             preLen = listOfCliques.Count;
             MergeChapterCliques(listOfCliques);
+
+            listOfCliques = listOfCliques.Distinct(new ListElementComparer()).ToList();
             listOfCliques = RemoveSubsets(listOfCliques).ToList();
             postLen = listOfCliques.Count;
-        } while (postLen < preLen);
+                
+        } while (postLen != preLen);
 
 
+        Console.WriteLine($"Len: {listOfCliques.Count}");
         foreach (var clique in listOfCliques.OrderByDescending(e => e.Count))
         {
             Console.WriteLine($" [{string.Join(", ", clique)}]");    
@@ -103,7 +106,7 @@ public class Experimentation: IJobPreset
                 var clique1 = listOfCliques[i];
                 var clique2 = listOfCliques[j];
 
-                var finder = new Algorithms.CliqueFinder<Element>(new ElementComparer());
+                var finder = new Algorithms.CliqueFinder<Element>();
                 
                 foreach (Element c1 in clique1)
                 {
@@ -147,7 +150,7 @@ public class Experimentation: IJobPreset
 
                     validMask[i] = false;
                     validMask[j] = false;
-                    foreach (var clique in finder.FindAllCliques())
+                    foreach (var clique in finder.FindAllMaximalCliques())
                     {
                         int distinct = clique.Select(e => e.idb).Distinct().Count();
                         if (distinct > 1)
@@ -185,7 +188,7 @@ public class Experimentation: IJobPreset
             return [];
 
         
-        var finder = new Algorithms.CliqueFinder<Element>(new ElementComparer());
+        var finder = new Algorithms.CliqueFinder<Element>();
 
         for (int i1 = 0; i1 < elements.Count; i1++)
         {
@@ -204,7 +207,7 @@ public class Experimentation: IJobPreset
             }
         }
 
-        foreach (var clique in finder.FindAllCliques())
+        foreach (var clique in finder.FindAllMaximalCliques())
         {
             int distinct = clique.Select(e => e.idb).Distinct().Count();
             if (distinct > 1)
@@ -271,17 +274,5 @@ public class Experimentation: IJobPreset
 
     }
 
-    private class ElementComparer : IComparer<Element>
-    {
-        public int Compare(Element? x, Element? y)
-        {
-            if (ReferenceEquals(x, y)) return 0;
-            if (x == null) return -1;
-            if (y == null) return 1;
-
-            int cmp = x.idb.CompareTo(y.idb);
-            return cmp != 0 ? cmp : string.Compare(x.text, y.text, StringComparison.Ordinal);
-        }
-    }
 
 }

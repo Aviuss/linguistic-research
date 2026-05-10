@@ -239,7 +239,7 @@ public sealed class ConfigSingelton
                     bookIDBs: this.bookIdbs,
                     languageRulesWrapper: this.languageRulesWrapper,
                     ipaLetterDistanceDict: this.ipaCustomLetterDistanceDict,
-                    threshold: (decimal)0.9
+                    threshold: (decimal)0.95
                 );
                 return;
 

@@ -8,12 +8,10 @@ namespace phylogenetic_project.Algorithms;
 class CliqueFinder<T> where T : notnull
 {
     private readonly Dictionary<T, HashSet<T>> _graph;
-    private IComparer<T> TComparer;
-
-    public CliqueFinder(IComparer<T> TComparer)
+    
+    public CliqueFinder()
     {
         _graph = new Dictionary<T, HashSet<T>>();
-        this.TComparer = TComparer;
     }
 
     public int GetGraphCount() => _graph.Count;
@@ -28,7 +26,7 @@ class CliqueFinder<T> where T : notnull
     }
 
 
-    private List<List<T>> FindAllMaximalCliques()
+    public List<List<T>> FindAllMaximalCliques()
     {
         var cliques = new List<List<T>>();
         var R = new HashSet<T>();
@@ -68,75 +66,11 @@ class CliqueFinder<T> where T : notnull
         }
     }
     
-    public List<List<T>> FindAllCliques()
-    {
-        var maximal = FindAllMaximalCliques();
-        var result  = new List<List<T>>();
-
-        foreach (var clique in maximal)
-        {
-            foreach (var subset in GetSubsets(clique))
-            {
-                if (subset.Count <= 1)
-                    continue;
-
-                subset.Sort(this.TComparer);
-                bool cliqueIsInResult = false;
-                
-                foreach (var res in result)
-                {
-                    if (res.Count != subset.Count)
-                        continue;
-
-                    for (int i = 0; i < subset.Count; i++)
-                    {
-                        if (!EqualityComparer<T>.Default.Equals(subset[i], res[i]))
-                        {
-                            cliqueIsInResult = true;
-                            break;
-                        }
-                    }
-
-                    if (cliqueIsInResult)
-                    {
-                        break;
-                    }
-
-                }
-                
-                if (!cliqueIsInResult)
-                    result.Add(subset);
-            
-            }
-        }       
-        return result.ToList();
-    }
-
     private HashSet<T> Neighbors(T v) {
         HashSet<T>? n;
         _graph.TryGetValue(v, out n);
         ArgumentNullException.ThrowIfNull(n);
         return n;
-    }
-
-    private static IEnumerable<List<T>> GetSubsets(List<T> set)
-    {
-        if (set.Count == 0)
-        {
-            yield return new List<T>();
-            yield break;
-        }
-
-        T first = set[0];
-        List<T> rest = set.Skip(1).ToList();
-
-        foreach (var subset in GetSubsets(rest))
-        {
-            yield return subset;
-
-            var withFirst = new List<T>(subset) { first };
-            yield return withFirst;
-        }
     }
 
 }
