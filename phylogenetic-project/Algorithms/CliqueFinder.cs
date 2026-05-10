@@ -8,11 +8,15 @@ namespace phylogenetic_project.Algorithms;
 class CliqueFinder<T> where T : notnull
 {
     private readonly Dictionary<T, HashSet<T>> _graph;
+    private IComparer<T> TComparer;
 
-    public CliqueFinder()
+    public CliqueFinder(IComparer<T> TComparer)
     {
         _graph = new Dictionary<T, HashSet<T>>();
+        this.TComparer = TComparer;
     }
+
+    public int GetGraphCount() => _graph.Count;
 
     public void Add((T, T) edge)
     {
@@ -52,11 +56,8 @@ class CliqueFinder<T> where T : notnull
         {
             var neighbors = Neighbors(v);
 
-            var newR = new HashSet<T>(R);
-            newR.Add(v);
-
             BronKerbosch(
-                newR,
+                new HashSet<T>(R) { v },
                 new HashSet<T>(P.Intersect(neighbors)),
                 new HashSet<T>(X.Intersect(neighbors)),
                 cliques
@@ -79,7 +80,7 @@ class CliqueFinder<T> where T : notnull
                 if (subset.Count <= 1)
                     continue;
 
-                subset.Sort();
+                subset.Sort(this.TComparer);
                 bool cliqueIsInResult = false;
                 
                 foreach (var res in result)

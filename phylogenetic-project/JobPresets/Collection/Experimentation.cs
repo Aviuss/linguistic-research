@@ -13,10 +13,9 @@ public class Experimentation: IJobPreset
     private IpaCustomLetterDistance ipaLetterDistanceDict;
     private decimal threshold; //values should be >= than this
     private int randomIpaSize = 10;
+    private int parallelWorkers = 16;
 
     record Element(string text, int idb);
-
-    private List<List<Element>> listOfCliques = [];
 
 
     public Experimentation(
@@ -26,7 +25,8 @@ public class Experimentation: IJobPreset
         Persistance.LanguageRulesWrapper languageRulesWrapper,
         IpaCustomLetterDistance ipaLetterDistanceDict,
         decimal threshold,
-        int randomIpaSize = 10
+        int randomIpaSize = 10,
+        int parallelWorkers = 16
     )
     {
         this.getChapterConstruct = getChapterConstruct;
@@ -36,40 +36,136 @@ public class Experimentation: IJobPreset
         this.threshold = threshold;
         this.ipaLetterDistanceDict = ipaLetterDistanceDict;
         this.randomIpaSize = randomIpaSize;
+        this.parallelWorkers = parallelWorkers;
     }
 
     public void Start()
     {
         Console.WriteLine("Experiment!");
         
-        for (int idx_chapter = 0; idx_chapter < chapters.Count; idx_chapter++)
+        object locker = new object();
+        List<List<Element>> listOfCliques = [];
+
+        Parallel.ForEach(
+            Enumerable.Range(0, chapters.Count),
+            new ParallelOptions { MaxDegreeOfParallelism = this.parallelWorkers },
+            idx_chapter =>
+            {
+                var chapterClique = GetChapterCliques(chapters[idx_chapter]);
+                lock (locker)
+                {
+                    listOfCliques.AddRange(chapterClique);
+                }
+            }
+        );
+
+
+        listOfCliques = listOfCliques.Distinct(new ListElementComparer()).ToList();
+        
+        listOfCliques = RemoveSubsets(listOfCliques).ToList();
+        
+        int preLen;
+        int postLen;
+
+        do
         {
-            processChapter(chapters[idx_chapter]);                
-        }
+            preLen = listOfCliques.Count;
+            MergeChapterCliques(listOfCliques);
+            listOfCliques = RemoveSubsets(listOfCliques).ToList();
+            postLen = listOfCliques.Count;
+        } while (postLen < preLen);
 
-        this.listOfCliques = this.listOfCliques.Distinct(new ListElementComparer()).ToList();
-        this.listOfCliques = RemoveSubsets(this.listOfCliques)
-            .OrderByDescending(e => e.Count)
-            .ToList();
 
-        // how to fix partially duplicate lists?
-        // for each list<Element>
-        //     take first element of that list and compare it to every other list<Element>
-        //     if match then do some more professional merging (creates clique for it and evaulates it)
-        // note: that wouldn't be best because first element may be the most weird one
-        // but.. is it even a good idea? kinda yeah, but we can do some weird matching, and it would loose point of chapter to chapter (performance increase but still)
-
-        foreach (var clique in this.listOfCliques)
+        foreach (var clique in listOfCliques.OrderByDescending(e => e.Count))
         {
             Console.WriteLine($" [{string.Join(", ", clique)}]");    
         }
-
-
     }
     
-
-    private void processChapter(int chapter)
+    private void MergeChapterCliques(List<List<Element>> listOfCliques)
     {
+        List<bool> validMask = Enumerable.Repeat(true, listOfCliques.Count).ToList();
+
+        for (int i = 0; i < listOfCliques.Count; i++)
+        {
+            if (validMask[i] == false)
+                continue;
+
+            for (int j = 0; j < listOfCliques.Count; j++)
+            {
+                if (validMask[i] == false)
+                    continue;
+                if (validMask[j] == false)
+                    continue;
+                if (i == j)
+                    continue;
+
+                var clique1 = listOfCliques[i];
+                var clique2 = listOfCliques[j];
+
+                var finder = new Algorithms.CliqueFinder<Element>(new ElementComparer());
+                
+                foreach (Element c1 in clique1)
+                {
+                    foreach (Element c2 in clique2)
+                    {
+                        if (c1 == c2)
+                            continue;
+
+                        var sim = CalculateSimilarity(c1, c2);
+                        if (sim >= threshold)
+                        {
+                            finder.Add((c1, c2));
+                        }
+                    }
+                }
+
+                if (finder.GetGraphCount() > 0)
+                {
+                    for (int ii = 0; ii < clique1.Count; ii++)
+                    {
+                        for (int jj = 0; jj < clique1.Count; jj++)
+                        {
+                            if (ii != jj)
+                            {
+                                finder.Add((clique1[ii], clique1[jj]));
+                            }
+                        }   
+                    }
+                    
+                    for (int ii = 0; ii < clique2.Count; ii++)
+                    {
+                        for (int jj = 0; jj < clique2.Count; jj++)
+                        {
+                            if (ii != jj)
+                            {
+                                finder.Add((clique2[ii], clique2[jj]));
+                            }
+                        }   
+                    }
+
+
+                    validMask[i] = false;
+                    validMask[j] = false;
+                    foreach (var clique in finder.FindAllCliques())
+                    {
+                        int distinct = clique.Select(e => e.idb).Distinct().Count();
+                        if (distinct > 1)
+                        {
+                            listOfCliques.Add(clique.ToList());
+                            validMask.Add(false);
+                        }
+                    }
+
+                }
+
+            }
+        }
+    }
+
+    private List<List<Element>> GetChapterCliques(int chapter)
+    {
+        List<List<Element>> listOfCliques = [];
         List<Element> elements = [];
         for (int idx_idb = 0; idx_idb < this.bookIDBs.Count; idx_idb++)
         {
@@ -86,10 +182,10 @@ public class Experimentation: IJobPreset
         }
         
         if (elements.Count == 0)
-            return;
+            return [];
 
         
-        var finder = new phylogenetic_project.Algorithms.CliqueFinder<Element>();
+        var finder = new Algorithms.CliqueFinder<Element>(new ElementComparer());
 
         for (int i1 = 0; i1 < elements.Count; i1++)
         {
@@ -97,31 +193,8 @@ public class Experimentation: IJobPreset
             {
                 Element e1 = elements[i1];
                 Element e2 = elements[i2];
-
-                Persistance.LanguageRules? ipaRule_idb1 = Array.Find(this.languageRulesWrapper.languageRules, element => element.IdbCompatible.Contains(e1.idb));
-                ArgumentNullException.ThrowIfNull(ipaRule_idb1);
-                Persistance.LanguageRules? ipaRule_idb2 = Array.Find(this.languageRulesWrapper.languageRules, element => element.IdbCompatible.Contains(e2.idb));
-                ArgumentNullException.ThrowIfNull(ipaRule_idb2);
-
-
-                var ipaText_idb1 = StaticMethods.IPA.ConvertToIpa(
-                    e1.text,
-                    ipaRule_idb1
-                );
-
-                var ipaText_idb2 = StaticMethods.IPA.ConvertToIpa(
-                    e2.text,
-                    ipaRule_idb2
-                );
-
-                var res = Algorithms.LevenshteinIPARandomChoiceAveragedWithCustomIpaDistance.Calculate(
-                    ipaText_idb1,
-                    ipaText_idb2,
-                    this.ipaLetterDistanceDict,
-                    this.randomIpaSize
-                );    
                 
-                var similarity = 1 - (res.levensthein_distance / res.max_chapter_length);
+                var similarity = CalculateSimilarity(e1, e2);
 
                 if (similarity >= threshold)
                 {
@@ -139,7 +212,35 @@ public class Experimentation: IJobPreset
                 listOfCliques.Add(clique.ToList());
             }
         }
-            
+
+        return listOfCliques;
+    }
+
+    private decimal CalculateSimilarity(Element e1, Element e2)
+    {
+        Persistance.LanguageRules? ipaRule_idb1 = Array.Find(this.languageRulesWrapper.languageRules, element => element.IdbCompatible.Contains(e1.idb));
+        ArgumentNullException.ThrowIfNull(ipaRule_idb1);
+        Persistance.LanguageRules? ipaRule_idb2 = Array.Find(this.languageRulesWrapper.languageRules, element => element.IdbCompatible.Contains(e2.idb));
+        ArgumentNullException.ThrowIfNull(ipaRule_idb2);
+
+        var ipaText_idb1 = StaticMethods.IPA.ConvertToIpa(
+            e1.text,
+            ipaRule_idb1
+        );
+
+        var ipaText_idb2 = StaticMethods.IPA.ConvertToIpa(
+            e2.text,
+            ipaRule_idb2
+        );
+
+        var res = Algorithms.LevenshteinIPARandomChoiceAveragedWithCustomIpaDistance.Calculate(
+            ipaText_idb1,
+            ipaText_idb2,
+            this.ipaLetterDistanceDict,
+            this.randomIpaSize
+        );    
+        
+        return 1 - (res.levensthein_distance / res.max_chapter_length);
     }
 
     private static List<List<Element>> RemoveSubsets(List<List<Element>> lists)
@@ -160,11 +261,27 @@ public class Experimentation: IJobPreset
     {
         public bool Equals(List<Element>? x, List<Element>? y) =>
             x != null && y != null &&
-            x.OrderBy(e => e.idb).SequenceEqual(y.OrderBy(e => e.idb));
+            x.OrderBy(e => e.idb).ThenBy(agent => agent.text).SequenceEqual(
+                y.OrderBy(e => e.idb).ThenBy(agent => agent.text)
+            );
 
         public int GetHashCode(List<Element> obj) =>
-            obj.OrderBy(e => e.idb)
+            obj.OrderBy(e => e.idb).ThenBy(agent => agent.text)
             .Aggregate(0, (hash, e) => HashCode.Combine(hash, e.GetHashCode()));
+
+    }
+
+    private class ElementComparer : IComparer<Element>
+    {
+        public int Compare(Element? x, Element? y)
+        {
+            if (ReferenceEquals(x, y)) return 0;
+            if (x == null) return -1;
+            if (y == null) return 1;
+
+            int cmp = x.idb.CompareTo(y.idb);
+            return cmp != 0 ? cmp : string.Compare(x.text, y.text, StringComparison.Ordinal);
+        }
     }
 
 }
