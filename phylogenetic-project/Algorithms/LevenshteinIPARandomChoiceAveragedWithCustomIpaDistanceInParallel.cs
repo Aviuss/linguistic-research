@@ -1,5 +1,6 @@
 using System;
 using System;
+using System.Globalization;
 using phylogenetic_project.Matrices.CellChapterJobs;
 
 namespace phylogenetic_project.Algorithms;
@@ -32,7 +33,10 @@ public class LevenshteinIPARandomChoiceAveragedWithCustomIpaDistanceInParallel
                 foreach (var (txt1String, txt2String) in listOfStringsPair)
                 {
                     var distResult = Algorithms.LevenshteinCustomIpaDistance.Distance(txt1String, txt2String, ipaLetterDistanceDict);
-                    var maxLen = Math.Max(txt1String.Length, txt2String.Length);
+                    var txt1StringTrueLen = new StringInfo(txt1String).LengthInTextElements;
+                    var txt2StringTrueLen = new StringInfo(txt2String).LengthInTextElements;
+                
+                    var maxLen = Math.Max(txt1StringTrueLen, txt2StringTrueLen);
 
                     lock (locker)
                     {

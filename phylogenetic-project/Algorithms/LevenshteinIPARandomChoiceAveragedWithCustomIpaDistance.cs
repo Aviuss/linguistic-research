@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using phylogenetic_project.Matrices.CellChapterJobs;
 
 namespace phylogenetic_project.Algorithms;
@@ -18,7 +19,10 @@ public class LevenshteinIPARandomChoiceAveragedWithCustomIpaDistance
         {
             count++;
             avgLevenshteinDistance += Algorithms.LevenshteinCustomIpaDistance.Distance(txt1String, txt2String, ipaLetterDistanceDict);
-            avgMaxDistance += Math.Max(txt1String.Length, txt2String.Length);
+            
+            var txt1StringTrueLen = new StringInfo(txt1String).LengthInTextElements;
+            var txt2StringTrueLen = new StringInfo(txt2String).LengthInTextElements;
+            avgMaxDistance += Math.Max(txt1StringTrueLen, txt2StringTrueLen);
         }
 
         return new LevenshteinIndividualDataDecimal(
