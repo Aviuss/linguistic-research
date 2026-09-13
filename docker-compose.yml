@@ -1,0 +1,16 @@
+services:
+  phylogenetic-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./input_data:/app/input_data
+      - ./output_data:/app/output_data
+    command: >
+      --job phylogenetic-tree-standard-text
+      --input-type sql
+      --input-type-path /app/input_data/SadownikDB.sqlite
+      --input-type-id sadownikdb
+      --output-folder-path /app/output_data/
+      --book-idbs 28,29,36
+      --chapters 1,2,3,16

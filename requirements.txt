@@ -1,0 +1,8 @@
+biopython==1.87
+ete3==3.1.3
+lxml==6.1.0
+numpy==2.4.4
+PyQt5==5.15.11
+PyQt5-Qt5==5.15.19
+PyQt5_sip==12.19.0
+six==1.17.0

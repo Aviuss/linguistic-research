@@ -11,7 +11,7 @@ public class Python
     public static void CallPythonScript(string filePath, string[]? arguments = null)
     {
         ProcessStartInfo start = new ProcessStartInfo();
-        start.FileName = "python";
+        start.FileName = "python3.11";
         start.ArgumentList.Add(filePath);
 
         for (int i = 0; arguments != null && i < arguments.Length; i++)

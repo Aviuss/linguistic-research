@@ -3,9 +3,22 @@
 
 # starting app
 
+## docker
+
+In the main directory
+- `docker compose build` (rebuild if any changes to the code are made)
+- ensure you have all files (probably in input_data directory)
+- `docker compose up`
+
+Program runs.
+
+In [docker-compose.yml](./docker-compose.yml) you can edit command's to the script.
+
+## no docker
+
 `python3.11 -m venv venv`
 `source venv/bin/activate`
-`pip install biopython==1.87 ete3==3.1.3 numpy==2.4.4 PyQt5==5.15.11 lxml==6.1.0 six==1.17.0`
+`pip install --no-cache-dir -r requirements.txt`
 
 - dotnet 10.0
 
