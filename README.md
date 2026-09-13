@@ -32,7 +32,7 @@ param: `--job phylogenetic-tree-standard-text`
 ### 2. Generating trees using ipa based levensthein
 
 While generating trees using ipa we can choose the options for it.
-- `--job phylogenetic-tree-ipa-singular-choice`, where in case of ambiguity in ipa rule selection, the first one is chosed
+- `--job phylogenetic-tree-ipa-singular-choice`, where in case of ambiguity in ipa rule selection, the first one is chosen
 - `--job phylogenetic-tree-ipa-random-choice`, where random rule selection is done multiple times, and then the result is averaged.
 
 required parameters:

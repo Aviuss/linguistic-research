@@ -64,3 +64,5 @@ output_data/results/*
 .vs/
 
 venv
+
+*.lscache

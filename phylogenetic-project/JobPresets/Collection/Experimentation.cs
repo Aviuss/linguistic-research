@@ -9,7 +9,7 @@ public class Experimentation: IJobPreset
     private IGetChapter getChapterConstruct;
     private List<int> chapters;
     private List<int> bookIDBs;
-    private Persistance.LanguageRulesWrapper languageRulesWrapper;
+    private LanguageRulesWrapper languageRulesWrapper;
     private IpaCustomLetterDistance ipaLetterDistanceDict;
     private decimal threshold; //values should be >= than this
     private int randomIpaSize = 10;
