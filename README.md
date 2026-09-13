@@ -47,6 +47,7 @@ param: `--job phylogenetic-tree-standard-text`
 While generating trees using ipa we can choose the options for it.
 - `--job phylogenetic-tree-ipa-singular-choice`, where in case of ambiguity in ipa rule selection, the first one is chosen
 - `--job phylogenetic-tree-ipa-random-choice`, where random rule selection is done multiple times, and then the result is averaged.
+- `--job analyze-missing-letters-from-ipa-rules`, doesn't generate trees. Checks the letters used in the text, and checks ipa rules coverage. Additionally when, `--custom-ipa-distance` is provided, it, checks coverage of ipa rules in defined custom distance. Should be ran with all chapters.
 
 required parameters:
 - `--ipa-rules [path]`

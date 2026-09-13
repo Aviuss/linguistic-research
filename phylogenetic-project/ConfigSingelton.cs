@@ -243,6 +243,21 @@ public sealed class ConfigSingelton
                 );
                 return;
 
+            case "analyze-missing-letters-from-ipa-rules":
+                ArgumentNullException.ThrowIfNull(this.languageRulesWrapper);
+
+                this.jobPreset = new phylogenetic_project.JobPresets.Collection.AnalyzeMissingLettersFromIpaRules(
+                        getChapterConstruct: this.inputStruct,
+                        chapters: this.chapters,
+                        bookIDBs: this.bookIdbs,
+                        outputResultPath: Path.Combine(this.outputFolderPath, "results", "analyze-missing-letters-from-ipa-rules", timeNow),
+                        languageRulesWrapper: this.languageRulesWrapper,
+                        ipaLetterDistanceDict: this.ipaCustomLetterDistanceDict,
+                        mapIdbToName: mapIdbToName
+                );
+                return;
+
+
             default:
                 throw new Exception("wrong job type. Check documentation for job input.");
         }
