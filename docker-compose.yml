@@ -7,10 +7,25 @@ services:
       - ./input_data:/app/input_data
       - ./output_data:/app/output_data
     command: >
-      --job phylogenetic-tree-standard-text
+      --job phylogenetic-tree-ipa-random-choice
+
       --input-type sql
       --input-type-path /app/input_data/SadownikDB.sqlite
       --input-type-id sadownikdb
+
+      --ipa-rules /app/input_data/ipa_rules.json
+      --ipa-rules-id ipa_rules_1
+      
+      --custom-ipa-distance /app/input_data/ipa_letter_distance.csv
+      --custom-ipa-distance-id custom-ipa-distance-1
+      
+      --map-idb-to-name /app/input_data/map_idb_to_name.json
+
       --output-folder-path /app/output_data/
-      --book-idbs 28,29,36
-      --chapters 1,2,3,16
+
+      --book-idbs 29,28,44,43,39,38,37,46,36,33,42
+      --chapters 1,2
+
+      --random-ipa-iterations 10
+      --parallel-workers 3
+      --cache-path /app/input_data/cache.sqlite
