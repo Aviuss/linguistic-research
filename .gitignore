@@ -66,3 +66,5 @@ output_data/results/*
 venv
 
 *.lscache
+
+cache.sqlite*
