@@ -21,6 +21,8 @@ public class AnalyzeMissingLettersFromIpaRules : IJobPreset
     private LanguageRulesWrapper languageRulesWrapper = null!;
     private IpaCustomLetterDistance? ipaLetterDistanceDict = null;
 
+    private HashSet<string> textLetterBlackList = null!;
+
     public AnalyzeMissingLettersFromIpaRules(
         IGetChapter getChapterConstruct,
         List<int> chapters,
@@ -38,12 +40,18 @@ public class AnalyzeMissingLettersFromIpaRules : IJobPreset
         this.languageRulesWrapper = languageRulesWrapper;
         this.mapIdbToName = mapIdbToName;
         this.ipaLetterDistanceDict = ipaLetterDistanceDict;
+        this.textLetterBlackList =  new() {"-", ",", ":", "!", "?", ".", "…", "“", "”", "„", "(", ")", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "–", "—", ";", "«", "»", "\"", "‑", " ", " ", "­", "̈"};
+
     }
 
     public void Start()
     {
+        StaticMethods.ConsoleProgress.Start();
+        StaticMethods.ConsoleProgress.total = bookIDBs.Count*chapters.Count;
+
+
         StringBuilder resultsForTextMissingInIpaRules = new();
-        foreach (int bookIDB in bookIDBs)
+        foreach (int bookIDB in this.bookIDBs)
         {
             resultsForTextMissingInIpaRules.Append(EvaulateBookForTextMissingInIpaRules(bookIDB));
         }        
@@ -60,17 +68,61 @@ public class AnalyzeMissingLettersFromIpaRules : IJobPreset
             book-idbs: {string.Join(", ", bookIDBs.Select(idb => idb.ToString()))}
             chapters: {string.Join(", ", chapters.Select(chap => chap.ToString()))}
             """),
-            ("results.txt", $"""
-            aaa
-            """)
+            ("results.txt", resultsForTextMissingInIpaRules.ToString())
         });
     }
 
     private StringBuilder EvaulateBookForTextMissingInIpaRules(int bookIDB)
     {
-        
+        Persistance.LanguageRules? ipaRule = Array.Find(this.languageRulesWrapper.languageRules, element => element.IdbCompatible.Contains(bookIDB));
+        ArgumentNullException.ThrowIfNull(ipaRule);
 
-        return new();
+        SortedSet<string> lettersMissingInIpaRules = new();
+        foreach (var chapter in this.chapters)
+        {
+            string chapterText = this.getChapterConstruct.GetChapter(bookIDB, chapter);
+            lettersMissingInIpaRules.UnionWith(
+                phylogenetic_project.StaticMethods.IPA.ConvertToIpa_ReturnLettersWhichDontConvert(chapterText, ipaRule)
+            );
+
+            StaticMethods.ConsoleProgress.PerformStep(1, $"ConvertToIpa_ReturnLettersWhichDontConvert()");
+        }
+        
+        lettersMissingInIpaRules.ExceptWith(this.textLetterBlackList);
+
+        StringBuilder results = new();
+        if (lettersMissingInIpaRules.Count == 0)
+        {
+            return results;
+        }
+
+        results.Append(
+            string.Format(
+                "book '{0}' has {1} unmatched symbols in rules for text to ipa conversion:\n",
+                getBookName(bookIDB), lettersMissingInIpaRules.Count
+            )
+        );
+
+        foreach (var x in lettersMissingInIpaRules) {
+            results.Append(string.Format("{0}\n", x));
+        }
+        
+        results.Append("\n");
+
+        return results;
+    }
+
+    private string getBookName(int bookIDB)
+    {
+        if (this.mapIdbToName != null && this.mapIdbToName.TryGetValue(bookIDB, out string? value))
+        {
+            if (value != null)
+            {
+                return value;
+            }
+        }
+
+        return "idb_" + bookIDB.ToString();
     }
 
 }
