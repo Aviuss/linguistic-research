@@ -33,7 +33,7 @@ public class LanguageRulesArrayConverter : JsonConverter<ConcurrentDictionary<st
             throw new JsonException("Expected start of values array");
 
         var values = JsonSerializer.Deserialize<string[]>(ref reader, options)!;
-        dict[key] = values;
+        dict[key.ToLowerInvariant()] = values;
 
         if (!reader.Read() || reader.TokenType != JsonTokenType.EndArray)
             throw new JsonException("Expected end of inner [key, values] array");
