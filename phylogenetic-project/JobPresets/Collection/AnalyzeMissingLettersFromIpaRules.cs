@@ -47,8 +47,9 @@ public class AnalyzeMissingLettersFromIpaRules : IJobPreset
     public void Start()
     {
         StaticMethods.ConsoleProgress.Start();
-        StaticMethods.ConsoleProgress.total = bookIDBs.Count*chapters.Count;
-
+        StaticMethods.ConsoleProgress.total = 
+            bookIDBs.Count*chapters.Count + 
+            (ipaLetterDistanceDict != null ? bookIDBs.Count : 0);
 
         StringBuilder resultsForTextMissingInIpaRules = new();
         foreach (int bookIDB in this.bookIDBs)
@@ -56,6 +57,15 @@ public class AnalyzeMissingLettersFromIpaRules : IJobPreset
             resultsForTextMissingInIpaRules.Append(EvaulateBookForTextMissingInIpaRules(bookIDB));
         }        
 
+        StringBuilder resultsIpaRulesCoverage = new();
+        if (ipaLetterDistanceDict != null)
+        {
+            foreach (int bookIDB in this.bookIDBs)
+            {
+                resultsIpaRulesCoverage.Append(EvaulateIpaRulesCoverage(bookIDB));
+                StaticMethods.ConsoleProgress.PerformStep(1, $"EvaulateIpaRulesCoverage()");
+            }    
+        }
 
         StaticMethods.SaveTemporaryResults.Save(this.outputResultPath, new (string, string)[]
         {
@@ -68,7 +78,8 @@ public class AnalyzeMissingLettersFromIpaRules : IJobPreset
             book-idbs: {string.Join(", ", bookIDBs.Select(idb => idb.ToString()))}
             chapters: {string.Join(", ", chapters.Select(chap => chap.ToString()))}
             """),
-            ("results.txt", resultsForTextMissingInIpaRules.ToString())
+            ("resultsForTextMissingInIpaRules.txt", resultsForTextMissingInIpaRules.ToString()),
+            ("resultsIpaRulesCoverage.txt", resultsIpaRulesCoverage.ToString())
         });
     }
 
@@ -84,7 +95,6 @@ public class AnalyzeMissingLettersFromIpaRules : IJobPreset
             lettersMissingInIpaRules.UnionWith(
                 phylogenetic_project.StaticMethods.IPA.ConvertToIpa_ReturnLettersWhichDontConvert(chapterText, ipaRule)
             );
-
             StaticMethods.ConsoleProgress.PerformStep(1, $"ConvertToIpa_ReturnLettersWhichDontConvert()");
         }
         
@@ -108,6 +118,57 @@ public class AnalyzeMissingLettersFromIpaRules : IJobPreset
         }
         
         results.Append("\n");
+
+        return results;
+    }
+
+    private StringBuilder EvaulateIpaRulesCoverage(int bookIDB) {
+        ArgumentNullException.ThrowIfNull(this.ipaLetterDistanceDict);
+        Persistance.LanguageRules? ipaRule = Array.Find(this.languageRulesWrapper.languageRules, element => element.IdbCompatible.Contains(bookIDB));
+        ArgumentNullException.ThrowIfNull(ipaRule);
+
+
+        HashSet<string> ipaDestinationRules = ipaRule.Rules
+            .Select(el => el.Value)
+            .Where(x => x != null)
+            .SelectMany(x => x)
+            .Where(x => x != null)
+            .Select(x => x)
+            .Select(x => Algorithms.LevenshteinCustomIpaDistance.EnumerateVisualIPAText(x).ToArray())
+            .SelectMany(x => x)
+            .Select(x => x.Item1)
+            .ToArray()
+            .ToHashSet();
+
+        List<string> missingIpaDistances = [];
+        foreach (string ipa in ipaDestinationRules)
+        {
+            if (!this.ipaLetterDistanceDict.HasString(ipa))
+            {
+                missingIpaDistances.Add(ipa);
+            }
+        }
+        missingIpaDistances.Sort();
+
+        StringBuilder results = new();
+        if (missingIpaDistances.Count == 0)
+        {
+            return results;
+        }
+
+        results.Append(
+            string.Format(
+                "book '{0}' has {1} unmatched ipa symbols in the distance rules:\n",
+                getBookName(bookIDB), missingIpaDistances.Count
+            )
+        );
+
+        foreach (var x in missingIpaDistances) {
+            results.Append(string.Format("{0}\n", x));
+        }
+        
+        results.Append("\n");
+
 
         return results;
     }

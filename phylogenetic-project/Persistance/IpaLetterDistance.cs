@@ -30,6 +30,18 @@ public class IpaCustomLetterDistance
         }
     }
 
+    public bool HasString(string a)
+    {
+        foreach (var key in ipaLetterDistanceDict)
+        {
+            if (a == key.Key.Item1 || a == key.Key.Item2)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private static ConcurrentDictionary<(string, string), decimal> ReadPhoneticCsv(string path)
     {
         var dict = new ConcurrentDictionary<(string, string), decimal>();
