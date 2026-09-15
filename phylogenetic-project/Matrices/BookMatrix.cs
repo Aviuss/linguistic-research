@@ -363,7 +363,7 @@ public class BookMatrix<T_FieldData>
 
                 if (number.Length == 1 && number.Length != maxLengthForNumber)
                 {
-                    number += ",";
+                    number += ".";
                 }
 
                 while (number.Length != maxLengthForNumber)
