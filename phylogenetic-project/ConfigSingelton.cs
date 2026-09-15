@@ -111,6 +111,7 @@ public sealed class ConfigSingelton
             if (cacheDbPath != null)
             {
                 cachedb = new CacheDB(cacheDbPath);
+                this.disposables.Add(cachedb);
             }
 
             instance.LoadInputType();
