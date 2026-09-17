@@ -11,7 +11,7 @@ services:
 
       --input-type sql
       --input-type-path /app/input_data/SadownikDB.sqlite
-      --input-type-id sadownikdb
+      --input-type-id sadownikdb_1
 
       --ipa-rules /app/input_data/ipa_rules.json
       --ipa-rules-id ipa_rules_1
@@ -24,7 +24,7 @@ services:
       --output-folder-path /app/output_data/
 
       --book-idbs 29,28,44,43,39,38,37,46,36,33,42
-      --chapters 1,2
+      --chapters 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28
 
       --random-ipa-iterations 10
       --parallel-workers 3
