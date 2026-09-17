@@ -29,3 +29,10 @@ services:
       --random-ipa-iterations 1000
       --parallel-workers 3
       --cache-path /app/input_data/cache.sqlite
+
+
+# launching 4 first sentences from litte prince
+# --input-type json
+# --input-type-path /app/input_data/four_phrases.json
+# --input-type-id four_phrases-1
+
