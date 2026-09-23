@@ -133,6 +133,7 @@ public sealed class ConfigSingelton
 
             instance.LoadInputType();
             instance.ApplyNormalizationRules();
+            instance.ValidateChapters();
             instance.LoadJobPreset();
         }
     }
@@ -171,6 +172,24 @@ public sealed class ConfigSingelton
         if (this.normalizationRules != null)
         {
             this.inputStruct = new Persistance.GetChapterNormalized(this.inputStruct, this.normalizationRules);
+        }
+    }
+
+    private void ValidateChapters()
+    {
+        ArgumentNullException.ThrowIfNull(this.inputStruct);
+        ArgumentNullException.ThrowIfNull(this.chapters);
+        ArgumentNullException.ThrowIfNull(this.bookIdbs);
+
+        foreach (int bookIdb in this.bookIdbs)
+        {
+            foreach (int chapter in this.chapters)
+            {
+                if (string.IsNullOrWhiteSpace(this.inputStruct.GetChapter(bookIdb, chapter)))
+                {
+                    throw new Exception($"Chapter {chapter} of book {bookIdb} is empty in \"{this.inputStruct.resourceId}\".");
+                }
+            }
         }
     }
 
