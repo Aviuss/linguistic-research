@@ -99,6 +99,13 @@ Maps `idb`s to more human readable names.
 
 If not present, it will be created.
 
+#### 4.4 `--normalization-rules [path]` and `--normalization-rules-id [string]`
+
+Normalizes chapter text (e.g. removes punctuation, collapses spaces) before any job uses it. Works with every job and every `--input-type`. Both params must be provided together.
+
+- `--normalization-rules [path]` path to the rules json
+- `--normalization-rules-id [string]` identifier for the resource (used mainly in valid caching).
+
 # code docs
 
 ## phylogenetic tree generation

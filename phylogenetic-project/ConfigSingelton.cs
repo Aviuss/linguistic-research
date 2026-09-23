@@ -26,6 +26,7 @@ public sealed class ConfigSingelton
     private LanguageRulesWrapper? languageRulesWrapper = null;
     private IpaCustomLetterDistance? ipaCustomLetterDistanceDict = null;
     private int? randomIpaIterations = null;
+    private NormalizationRules? normalizationRules = null;
 
     private static ConfigSingelton instance = null!;
     private static object creationLock = new();
@@ -55,6 +56,8 @@ public sealed class ConfigSingelton
                 .SupportsOption<string>("custom-ipa-distance", "Path to custom ipa distance")
                 .SupportsOption<string>("custom-ipa-distance-id", "Id for custom ipa distance")
                 .SupportsOption<string>("map-idb-to-name", "Path to map to idb json file")
+                .SupportsOption<string>("normalization-rules", "Path to text normalization rules json")
+                .SupportsOption<string>("normalization-rules-id", "Identifyier defining normalization rules resource for valid caching")
                 .SupportsOption<int>("random-ipa-iterations", "Number of iterations for random iteration job")
                 .SupportsOption<uint>("parallel-workers", "Number of parallel executions. Default is 1.", 1)
                 .SupportsFlag("no-python", "Disables python scripts")
@@ -101,6 +104,17 @@ public sealed class ConfigSingelton
                 instance.mapIdbToName = Persistance.MapIdbToName.ReadFromFile(mapIdbToNameFilePath);
             }
 
+            string? normalizationRulesPath = parser.GetOption<string>("normalization-rules");
+            string? normalizationRulesId = parser.GetOption<string>("normalization-rules-id");
+            if ((normalizationRulesPath == null) != (normalizationRulesId == null))
+            {
+                throw new Exception("--normalization-rules and --normalization-rules-id must be provided together.");
+            }
+            if (normalizationRulesPath != null && normalizationRulesId != null)
+            {
+                instance.normalizationRules = new Persistance.NormalizationRules(normalizationRulesPath, normalizationRulesId);
+            }
+
             instance.randomIpaIterations = parser.GetOption<int>("random-ipa-iterations");
             if (instance.randomIpaIterations == 0)
             {
@@ -115,6 +129,7 @@ public sealed class ConfigSingelton
             }
 
             instance.LoadInputType();
+            instance.ApplyNormalizationRules();
             instance.LoadJobPreset();
         }
     }
@@ -144,6 +159,16 @@ public sealed class ConfigSingelton
         }
 
         throw new Exception("wrong inputType type. Can be only \"sql\" or \"json\" ");
+    }
+
+    private void ApplyNormalizationRules()
+    {
+        ArgumentNullException.ThrowIfNull(this.inputStruct);
+
+        if (this.normalizationRules != null)
+        {
+            this.inputStruct = new Persistance.GetChapterNormalized(this.inputStruct, this.normalizationRules);
+        }
     }
 
     private void LoadJobPreset()
