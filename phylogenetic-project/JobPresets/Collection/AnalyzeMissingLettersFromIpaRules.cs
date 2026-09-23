@@ -21,8 +21,6 @@ public class AnalyzeMissingLettersFromIpaRules : IJobPreset
     private LanguageRulesWrapper languageRulesWrapper = null!;
     private IpaCustomLetterDistance? ipaLetterDistanceDict = null;
 
-    private HashSet<string> textLetterBlackList = null!;
-
     public AnalyzeMissingLettersFromIpaRules(
         IGetChapter getChapterConstruct,
         List<int> chapters,
@@ -95,8 +93,6 @@ public class AnalyzeMissingLettersFromIpaRules : IJobPreset
             );
             StaticMethods.ConsoleProgress.PerformStep(1, $"ConvertToIpa_ReturnLettersWhichDontConvert()");
         }
-        
-        lettersMissingInIpaRules.ExceptWith(this.textLetterBlackList);
 
         StringBuilder results = new();
         if (lettersMissingInIpaRules.Count == 0)
@@ -112,9 +108,9 @@ public class AnalyzeMissingLettersFromIpaRules : IJobPreset
         );
 
         foreach (var x in lettersMissingInIpaRules) {
-            results.Append(string.Format("{0}\n", x));
+            results.Append(string.Format("{0}\t[{1}]\n", x, string.Join(" ", x.Select(c => $"U+{(int)c:X4}"))));
         }
-        
+
         results.Append("\n");
 
         return results;
