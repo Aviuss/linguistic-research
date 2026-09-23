@@ -13,6 +13,10 @@ public class Program
     public static List<Process> runningProcesses = new();
     public static CancellationTokenSource cts = new();
     public static ConfigSingelton config = ConfigSingelton.Instance;
+    
+    // Part of every cache row's total_hash. Bump it whenever code changes computed results
+    // (distance, IPA conversion, random choice, merging), so old cached results stop matching.
+    public const string AlgorithmVersion = "algo-v2";
 
     static void Main(string[] args)
     {

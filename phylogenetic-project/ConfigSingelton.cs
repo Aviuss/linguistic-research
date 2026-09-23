@@ -27,6 +27,7 @@ public sealed class ConfigSingelton
     private IpaCustomLetterDistance? ipaCustomLetterDistanceDict = null;
     private int? randomIpaIterations = null;
     private NormalizationRules? normalizationRules = null;
+    private string inputFilesHash = null!;
 
     private static ConfigSingelton instance = null!;
     private static object creationLock = new();
@@ -121,6 +122,12 @@ public sealed class ConfigSingelton
             {
                 instance.randomIpaIterations = null;
             }
+
+            instance.inputFilesHash = StaticMethods.Hashing.Combine(
+                ("ipa-rules", ipaRulesPath == null ? "" : StaticMethods.Hashing.HashFile(ipaRulesPath)),
+                ("custom-ipa-distance", customIpaDistancePath == null ? "" : StaticMethods.Hashing.HashFile(customIpaDistancePath)),
+                ("normalization-rules", normalizationRulesPath == null ? "" : StaticMethods.Hashing.HashFile(normalizationRulesPath))
+            );
 
             StaticMethods.VerboseLog.Configure(parser.GetOption<string>("verbose"), instance.mapIdbToName);
 
@@ -272,8 +279,9 @@ public sealed class ConfigSingelton
                         parallelExecution: this.parallelWorkers,
                         noPython: this.noPython,
                         mapIdbToName: mapIdbToName,
-                        cachedb: this.cachedb
-                    ); 
+                        cachedb: this.cachedb,
+                        inputFilesHash: this.inputFilesHash
+                    );
                 }
                 return;
 

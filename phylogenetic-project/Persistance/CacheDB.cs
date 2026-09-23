@@ -30,7 +30,8 @@ public class CacheDB: IDisposable
                 idb1 INTEGER NOT NULL,
                 idb2 INTEGER NOT NULL,
                 chapter INTEGER NOT NULL,
-                timestamp INTEGER
+                timestamp INTEGER,
+                total_hash TEXT NOT NULL
             );
         ";
         command.ExecuteNonQuery();
@@ -65,13 +66,13 @@ public class CacheDB: IDisposable
     }
 
 
-    public void InsertCache(string algorithmName, string algorithmArgs, string algorithmResult, int idb1, int idb2, int chapter)
+    public void InsertCache(string algorithmName, string algorithmArgs, string algorithmResult, int idb1, int idb2, int chapter, string totalHash)
     {
         var command = connection.CreateCommand();
         command.CommandText =
         @"
             INSERT INTO data
-                (id, algorithm, algorithmArgs, algorithmResult, idb1, idb2, chapter, timestamp)
+                (id, algorithm, algorithmArgs, algorithmResult, idb1, idb2, chapter, timestamp, total_hash)
             VALUES
                 (
                     (SELECT IFNULL(MAX(id), 0) + 1 FROM data),
@@ -81,7 +82,8 @@ public class CacheDB: IDisposable
                     $idb1,
                     $idb2,
                     $chapter,
-                    $timestamp
+                    $timestamp,
+                    $totalHash
                 );
         ";
         command.Parameters.AddWithValue("$algorithm", algorithmName);
@@ -91,10 +93,11 @@ public class CacheDB: IDisposable
         command.Parameters.AddWithValue("$idb2", idb2);
         command.Parameters.AddWithValue("$chapter", chapter);
         command.Parameters.AddWithValue("$timestamp", DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+        command.Parameters.AddWithValue("$totalHash", totalHash);
         command.ExecuteNonQuery();
     }
-    
-    public string? TryToGetFromCache(string algorithmName, string algorithmArgs, int idb1, int idb2, int chapter)
+
+    public string? TryToGetFromCache(string algorithmName, string algorithmArgs, int idb1, int idb2, int chapter, string totalHash)
     {
         using var command = connection.CreateCommand();
         command.CommandText = """
@@ -104,7 +107,8 @@ public class CacheDB: IDisposable
             algorithmArgs = $algorithmArgs AND
             idb1 = $idb1 AND
             idb2 = $idb2 AND
-            chapter = $chapter;
+            chapter = $chapter AND
+            total_hash = $totalHash;
         """;
 
         command.Parameters.AddWithValue("$algorithm", algorithmName);
@@ -112,7 +116,7 @@ public class CacheDB: IDisposable
         command.Parameters.AddWithValue("$idb1", idb1);
         command.Parameters.AddWithValue("$idb2", idb2);
         command.Parameters.AddWithValue("$chapter", chapter);
-        
+        command.Parameters.AddWithValue("$totalHash", totalHash);
 
         using var reader = command.ExecuteReader();
         while (reader.Read())

@@ -74,7 +74,8 @@ public class BookMatrix<T_FieldData>
                     {
                         string? result = cacheDBIDWrapper.cacheDB.TryToGetFromCache(
                             cacheDBIDWrapper.algorithmName,
-                            cacheDBIDWrapper.algorithmArgs, bookIDBs[idx_idb1], bookIDBs[idx_idb2], chapters[idx_chapter]
+                            cacheDBIDWrapper.algorithmArgs, bookIDBs[idx_idb1], bookIDBs[idx_idb2], chapters[idx_chapter],
+                            cacheDBIDWrapper.TotalHash(bookIDBs[idx_idb1], bookIDBs[idx_idb2], chapters[idx_chapter])
                         );
 
                         if (result != null)
@@ -99,7 +100,8 @@ public class BookMatrix<T_FieldData>
                         JsonSerializer.Serialize(matrix[idx_idb1, idx_idb2][idx_chapter]),
                         bookIDBs[idx_idb1],
                         bookIDBs[idx_idb2],
-                        chapters[idx_chapter]
+                        chapters[idx_chapter],
+                        cacheDBIDWrapper.TotalHash(bookIDBs[idx_idb1], bookIDBs[idx_idb2], chapters[idx_chapter])
                     );
 
                     if (this.cacheDBIDWrapper == null)
@@ -221,7 +223,7 @@ public class BookMatrix<T_FieldData>
 
                     if (cacheDBIDWrapper != null && cacheDBIDWrapper.cacheDB != null)
                     {
-                        string? result = cacheDBIDWrapper.cacheDB.TryToGetFromCache(cacheDBIDWrapper.algorithmName, cacheDBIDWrapper.algorithmArgs, bookIDBs[idx_idb1], bookIDBs[idx_idb2], chapters[idx_chapter]);
+                        string? result = cacheDBIDWrapper.cacheDB.TryToGetFromCache(cacheDBIDWrapper.algorithmName, cacheDBIDWrapper.algorithmArgs, bookIDBs[idx_idb1], bookIDBs[idx_idb2], chapters[idx_chapter], cacheDBIDWrapper.TotalHash(bookIDBs[idx_idb1], bookIDBs[idx_idb2], chapters[idx_chapter]));
                         if (result != null)
                         {
                             T_FieldData? obj = JsonSerializer.Deserialize<T_FieldData>(result);
