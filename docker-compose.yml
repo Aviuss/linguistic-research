@@ -21,6 +21,10 @@ services:
       
       --map-idb-to-name /app/input_data/map_idb_to_name.json
 
+      --normalization-rules /app/input_data/normalization_rules.json
+      --normalization-rules-id norm-rules-1
+
+
       --output-folder-path /app/output_data/
 
       --book-idbs 29,28,44,43,39,38,37,46,36,33,42
@@ -29,6 +33,7 @@ services:
       --random-ipa-iterations 1000
       --parallel-workers 3
       --cache-path /app/input_data/cache.sqlite
+      --verbose normal
 
 
 # launching 4 first sentences from litte prince

@@ -55,6 +55,9 @@ public class IPARandomChoiceLevenshteinAveragedWithCusomIpaDistancePreset : IJob
 
     public void Start()
     {
+        using var verboseLog = StaticMethods.VerboseLog.Open(this.outputResultPath);
+        StaticMethods.VerboseLog.LogBooks(getChapterConstruct, bookIDBs, chapters, languageRulesWrapper.languageRules);
+
         Matrices.BookMatrix<Matrices.CellChapterJobs.LevenshteinIndividualDataDecimal> levenshteinMatrix;
 
         levenshteinMatrix = new Matrices.BookMatrix<Matrices.CellChapterJobs.LevenshteinIndividualDataDecimal>(

@@ -106,6 +106,10 @@ Normalizes chapter text (e.g. removes punctuation, collapses spaces) before any 
 - `--normalization-rules [path]` path to the rules json
 - `--normalization-rules-id [string]` identifier for the resource (used mainly in valid caching).
 
+#### 4.5 `--verbose [level]`
+
+Writes `verbose.log` into the job's results folder, showing every pipeline step from input to output. Level is `normal` or `high`.
+
 # code docs
 
 ## phylogenetic tree generation

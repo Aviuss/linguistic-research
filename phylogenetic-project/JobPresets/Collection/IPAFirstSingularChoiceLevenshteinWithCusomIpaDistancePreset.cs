@@ -47,6 +47,9 @@ public class IPAFirstSingularChoiceLevenshteinWithCusomIpaDistancePreset : IJobP
 
     public void Start()
     {
+        using var verboseLog = StaticMethods.VerboseLog.Open(this.outputResultPath);
+        StaticMethods.VerboseLog.LogBooks(getChapterConstruct, bookIDBs, chapters, languageRulesWrapper.languageRules);
+
         var levenshteinMatrix = new Matrices.BookMatrix<Matrices.CellChapterJobs.LevenshteinIndividualDataDecimal>(
             bookIDBs_: bookIDBs,
             chapters_: chapters,

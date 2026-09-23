@@ -18,10 +18,10 @@ public class LevenshteinIPAFirstSingularWithCustomIpaDistance
     
         var maxLen = Math.Max(txt1StringTrueLen, txt2StringTrueLen);
 
-        return new LevenshteinIndividualDataDecimal(
-            Algorithms.LevenshteinCustomIpaDistance.Distance(txt1String, txt2String, ipaLetterDistanceDict),
-            (decimal)maxLen
-        );
+        decimal distance = Algorithms.LevenshteinCustomIpaDistance.Distance(txt1String, txt2String, ipaLetterDistanceDict);
+        StaticMethods.VerboseLog.Combination(0, txt1String, txt2String, distance, maxLen);
+
+        return new LevenshteinIndividualDataDecimal(distance, (decimal)maxLen);
     }
 
 }

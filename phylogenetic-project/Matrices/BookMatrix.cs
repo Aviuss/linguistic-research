@@ -62,12 +62,14 @@ public class BookMatrix<T_FieldData>
 
         result_matrix = new decimal[this.bookIDBs.Count, this.bookIDBs.Count];
 
+        StaticMethods.VerboseLog.Section("PAIRS: per chapter");
         for (int idx_idb1 = 0; idx_idb1 < bookIDBs.Count; idx_idb1++)
         {
             for (int idx_idb2 = idx_idb1 + 1; idx_idb2 < bookIDBs.Count; idx_idb2++)
             {
                 for (int idx_chapter = 0; idx_chapter < chapters.Count; idx_chapter++)
                 {
+                    StaticMethods.VerboseLog.WriteLine($"\n--- {StaticMethods.VerboseLog.BookLabel(bookIDBs[idx_idb1])} vs {StaticMethods.VerboseLog.BookLabel(bookIDBs[idx_idb2])} | chapter {chapters[idx_chapter]} ---");
                     if (cacheDBIDWrapper != null && cacheDBIDWrapper.cacheDB != null)
                     {
                         string? result = cacheDBIDWrapper.cacheDB.TryToGetFromCache(
@@ -82,12 +84,14 @@ public class BookMatrix<T_FieldData>
                             {
                                 matrix[idx_idb1, idx_idb2][idx_chapter] = obj;
                                 matrix[idx_idb2, idx_idb1][idx_chapter] = obj;
+                                StaticMethods.VerboseLog.WriteLine($"loaded from cache: {result}");
                                 continue;
                             }
                         }
                     }
                     matrix[idx_idb1, idx_idb2][idx_chapter] = matrixCellChapterJob.Calculate(idx_idb1, idx_idb2, idx_chapter);
                     matrix[idx_idb2, idx_idb1][idx_chapter] = matrix[idx_idb1, idx_idb2][idx_chapter];
+                    StaticMethods.VerboseLog.WriteLine($"result: {JsonSerializer.Serialize(matrix[idx_idb1, idx_idb2][idx_chapter])}");
 
                     cacheDBIDWrapper?.cacheDB?.InsertCache(
                         cacheDBIDWrapper.algorithmName,
@@ -107,6 +111,7 @@ public class BookMatrix<T_FieldData>
         }
 
 
+        StaticMethods.VerboseLog.Section("RESULT: chapters merged per pair (sum of distances / sum of max lengths)");
         for (int idx_idb1 = 0; idx_idb1 < bookIDBs.Count; idx_idb1++)
         {
             for (int idx_idb2 = idx_idb1; idx_idb2 < bookIDBs.Count; idx_idb2++)
@@ -118,6 +123,7 @@ public class BookMatrix<T_FieldData>
                 {
                     result_matrix[idx_idb1, idx_idb2] = matrixCellChapterJob.MergeChapters(matrix[idx_idb1, idx_idb2]);
                     result_matrix[idx_idb2, idx_idb1] = result_matrix[idx_idb1, idx_idb2];
+                    StaticMethods.VerboseLog.WriteLine($"{StaticMethods.VerboseLog.BookLabel(bookIDBs[idx_idb1])} vs {StaticMethods.VerboseLog.BookLabel(bookIDBs[idx_idb2])}: {result_matrix[idx_idb1, idx_idb2]}");
                 }
             }
         }

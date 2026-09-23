@@ -60,6 +60,7 @@ public sealed class ConfigSingelton
                 .SupportsOption<string>("normalization-rules-id", "Identifyier defining normalization rules resource for valid caching")
                 .SupportsOption<int>("random-ipa-iterations", "Number of iterations for random iteration job")
                 .SupportsOption<uint>("parallel-workers", "Number of parallel executions. Default is 1.", 1)
+                .SupportsOption<string>("verbose", "Writes verbose.log with every pipeline step into the results folder. Level: normal or high")
                 .SupportsFlag("no-python", "Disables python scripts")
                 .Parse();
             
@@ -120,6 +121,8 @@ public sealed class ConfigSingelton
             {
                 instance.randomIpaIterations = null;
             }
+
+            StaticMethods.VerboseLog.Configure(parser.GetOption<string>("verbose"), instance.mapIdbToName);
 
             string? cacheDbPath = parser.GetOption<string>("cache-path");
             if (cacheDbPath != null)

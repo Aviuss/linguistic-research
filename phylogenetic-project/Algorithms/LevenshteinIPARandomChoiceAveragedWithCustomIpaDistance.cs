@@ -17,12 +17,16 @@ public class LevenshteinIPARandomChoiceAveragedWithCustomIpaDistance
         int count = 0;
         foreach (var (txt1String, txt2String) in enumerator)
         {
-            count++;
-            avgLevenshteinDistance += Algorithms.LevenshteinCustomIpaDistance.Distance(txt1String, txt2String, ipaLetterDistanceDict);
+            var distance = Algorithms.LevenshteinCustomIpaDistance.Distance(txt1String, txt2String, ipaLetterDistanceDict);
             
             var txt1StringTrueLen = new StringInfo(txt1String).LengthInTextElements;
             var txt2StringTrueLen = new StringInfo(txt2String).LengthInTextElements;
-            avgMaxDistance += Math.Max(txt1StringTrueLen, txt2StringTrueLen);
+            var maxLen = Math.Max(txt1StringTrueLen, txt2StringTrueLen);
+            StaticMethods.VerboseLog.Combination(count, txt1String, txt2String, distance, maxLen);
+
+            count++;
+            avgLevenshteinDistance += distance;
+            avgMaxDistance += maxLen;
         }
 
         return new LevenshteinIndividualDataDecimal(

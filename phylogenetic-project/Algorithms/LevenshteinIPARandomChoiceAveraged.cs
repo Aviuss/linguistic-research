@@ -17,9 +17,13 @@ public class LevenshteinIPARandomChoiceAveraged
         int count = 0;
         foreach (var (txt1String, txt2String) in enumerator)
         {
+            int distance = Algorithms.Levenshtein.Distance(txt1String, txt2String);
+            int maxLen = Math.Max(txt1String.Length, txt2String.Length);
+            StaticMethods.VerboseLog.Combination(count, txt1String, txt2String, distance, maxLen);
+
             count++;
-            avgLevenshteinDistance += Algorithms.Levenshtein.Distance(txt1String, txt2String);
-            avgMaxDistance += Math.Max(txt1String.Length, txt2String.Length);
+            avgLevenshteinDistance += distance;
+            avgMaxDistance += maxLen;
         }
 
         return new LevenshteinIndividualDataDecimal(

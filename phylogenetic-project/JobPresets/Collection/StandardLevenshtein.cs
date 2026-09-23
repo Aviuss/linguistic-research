@@ -39,6 +39,9 @@ public class StandardLevenshtein : IJobPreset
 
     public void Start()
     {
+        using var verboseLog = StaticMethods.VerboseLog.Open(this.outputResultPath);
+        StaticMethods.VerboseLog.LogBooks(getChapterConstruct, bookIDBs, chapters);
+
         var levenshteinMatrix = new Matrices.BookMatrix<Matrices.CellChapterJobs.LevenshteinIndividualDataInt>(
              bookIDBs_: bookIDBs,
              chapters_: chapters,

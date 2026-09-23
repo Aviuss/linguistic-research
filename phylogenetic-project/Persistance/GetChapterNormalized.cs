@@ -7,7 +7,7 @@ public class GetChapterNormalized : IGetChapter
 {
     public string resourceId => $"{inner.resourceId}+normalization:{normalizationRules.resourceId}";
 
-    private IGetChapter inner;
+    public IGetChapter inner;
     private NormalizationRules normalizationRules;
     private ConcurrentDictionary<(int, int), string> normalizedChapters = new();
 
