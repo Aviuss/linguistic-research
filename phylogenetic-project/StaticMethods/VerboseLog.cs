@@ -13,21 +13,28 @@ public static class VerboseLog
     public static bool IsEnabled => writer != null;
     public static bool IsHigh => level == "high";
 
-    private static string level = null!;
+    private static string? level = null;
     private static IDictionary<int, string>? mapIdbToName = null;
     private static StreamWriter? writer = null;
     private static readonly object writeLock = new();
 
+    /// <summary>
+    /// Sets the verbose level. When level_ is null (--verbose not given) logging stays disabled.
+    /// </summary>
     public static void Configure(string? level_, IDictionary<int, string>? mapIdbToName_)
     {
-        ArgumentNullException.ThrowIfNull(level_);
+        mapIdbToName = mapIdbToName_;
+        if (level_ == null)
+        {
+            return;
+        }
+
         if (level_ != "normal" && level_ != "high")
         {
             throw new Exception($"Wrong --verbose level \"{level_}\". Can be only \"normal\" or \"high\".");
         }
         
         level = level_;
-        mapIdbToName = mapIdbToName_;
     }
 
     public static IDisposable Open(string folderPath)
@@ -44,11 +51,9 @@ public static class VerboseLog
 
     public static void WriteLine(string text)
     {
-        ArgumentNullException.ThrowIfNull(writer);
-
         lock (writeLock)
         {
-            writer.WriteLine(text);
+            writer?.WriteLine(text);
         }
     }
 
