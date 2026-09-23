@@ -47,11 +47,12 @@ public class AnalyzeMissingLettersFromIpaRules : IJobPreset
             bookIDBs.Count*chapters.Count + 
             (ipaLetterDistanceDict != null ? bookIDBs.Count : 0);
 
-        StringBuilder resultsForTextMissingInIpaRules = new();
+        List<(int bookIDB, SortedSet<string> missing)> lettersMissingPerBook = new();
         foreach (int bookIDB in this.bookIDBs)
         {
-            resultsForTextMissingInIpaRules.Append(EvaulateBookForTextMissingInIpaRules(bookIDB));
-        }        
+            lettersMissingPerBook.Add((bookIDB, EvaulateBookForTextMissingInIpaRules(bookIDB)));
+        }
+        StringBuilder resultsForTextMissingInIpaRules = FormatTextMissingInIpaRules(lettersMissingPerBook);
 
         StringBuilder resultsIpaRulesCoverage = new();
         if (ipaLetterDistanceDict != null)
@@ -79,12 +80,12 @@ public class AnalyzeMissingLettersFromIpaRules : IJobPreset
         });
     }
 
-    private StringBuilder EvaulateBookForTextMissingInIpaRules(int bookIDB)
+    private SortedSet<string> EvaulateBookForTextMissingInIpaRules(int bookIDB)
     {
         Persistance.LanguageRules? ipaRule = Array.Find(this.languageRulesWrapper.languageRules, element => element.IdbCompatible.Contains(bookIDB));
         ArgumentNullException.ThrowIfNull(ipaRule);
 
-        SortedSet<string> lettersMissingInIpaRules = new();
+        SortedSet<string> lettersMissingInIpaRules = new(StringComparer.Ordinal);
         foreach (var chapter in this.chapters)
         {
             string chapterText = this.getChapterConstruct.GetChapter(bookIDB, chapter);
@@ -94,26 +95,65 @@ public class AnalyzeMissingLettersFromIpaRules : IJobPreset
             StaticMethods.ConsoleProgress.PerformStep(1, $"ConvertToIpa_ReturnLettersWhichDontConvert()");
         }
 
+        return lettersMissingInIpaRules;
+    }
+
+    private StringBuilder FormatTextMissingInIpaRules(List<(int bookIDB, SortedSet<string> missing)> lettersMissingPerBook)
+    {
         StringBuilder results = new();
-        if (lettersMissingInIpaRules.Count == 0)
+        var booksWithMissing = lettersMissingPerBook.Where(x => x.missing.Count > 0).ToList();
+        if (booksWithMissing.Count == 0)
         {
             return results;
         }
 
-        results.Append(
-            string.Format(
-                "book '{0}' has {1} unmatched symbols in rules for text to ipa conversion:\n",
-                getBookName(bookIDB), lettersMissingInIpaRules.Count
-            )
-        );
-
-        foreach (var x in lettersMissingInIpaRules) {
-            results.Append(string.Format("{0}\t[{1}]\n", x, string.Join(" ", x.Select(c => $"U+{(int)c:X4}"))));
+        // symbols missing in every book that has any missing symbols; printed once instead of per book
+        SortedSet<string> common = new(StringComparer.Ordinal);
+        if (booksWithMissing.Count > 1)
+        {
+            common.UnionWith(booksWithMissing[0].missing);
+            foreach (var (_, missing) in booksWithMissing.Skip(1))
+            {
+                common.IntersectWith(missing);
+            }
         }
 
-        results.Append("\n");
+        if (common.Count > 0)
+        {
+            results.Append(
+                string.Format(
+                    "{0} unmatched symbols in rules for text to ipa conversion common to all {1} books listed below:\n",
+                    common.Count, booksWithMissing.Count
+                )
+            );
+            AppendSymbols(results, common);
+            results.Append("\n");
+        }
+
+        foreach (var (bookIDB, missing) in booksWithMissing)
+        {
+            var specific = missing.Where(x => !common.Contains(x)).ToList();
+            results.Append(
+                string.Format(
+                    "book '{0}' has {1} unmatched symbols in rules for text to ipa conversion{2}\n",
+                    getBookName(bookIDB), missing.Count,
+                    common.Count == 0 ? ":"
+                        : specific.Count == 0 ? $" (only the {common.Count} common ones)"
+                        : $" ({common.Count} common + {specific.Count} specific):"
+                )
+            );
+            AppendSymbols(results, specific);
+            results.Append("\n");
+        }
 
         return results;
+    }
+
+    private static void AppendSymbols(StringBuilder results, IEnumerable<string> symbols)
+    {
+        foreach (var x in symbols) {
+            results.Append(string.Format("{0}\t[{1}]\n", x, string.Join(" ", x.Select(c => $"U+{(int)c:X4}"))));
+        }
     }
 
     private StringBuilder EvaulateIpaRulesCoverage(int bookIDB) {
