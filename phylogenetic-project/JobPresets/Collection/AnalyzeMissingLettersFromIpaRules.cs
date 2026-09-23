@@ -133,13 +133,13 @@ public class AnalyzeMissingLettersFromIpaRules : IJobPreset
         foreach (var (bookIDB, missing) in booksWithMissing)
         {
             var specific = missing.Where(x => !common.Contains(x)).ToList();
+            if (specific.Count == 0) { continue; }
+
             results.Append(
                 string.Format(
                     "book '{0}' has {1} unmatched symbols in rules for text to ipa conversion{2}\n",
                     getBookName(bookIDB), missing.Count,
-                    common.Count == 0 ? ":"
-                        : specific.Count == 0 ? $" (only the {common.Count} common ones)"
-                        : $" ({common.Count} common + {specific.Count} specific):"
+                    $" ({common.Count} common + {specific.Count} specific):"
                 )
             );
             AppendSymbols(results, specific);
@@ -213,7 +213,7 @@ public class AnalyzeMissingLettersFromIpaRules : IJobPreset
         {
             if (value != null)
             {
-                return value;
+                return value + " (idb_" + bookIDB.ToString() + ")";
             }
         }
 
