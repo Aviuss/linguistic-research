@@ -74,6 +74,11 @@ public class IpaCustomLetterDistance
 
                 if (decimal.TryParse(normalized, NumberStyles.Any, numberFormat, out decimal value))
                 {
+                    if (value < 0 || value > 1)
+                    {
+                        throw new Exception("parsed value should be in range [0; 1] for IPA letter distance");
+                    }
+
                     if (string.CompareOrdinal(rowSymbol, colSymbol) < 0)
                     {
                         dict.TryAdd((rowSymbol, colSymbol), value);
