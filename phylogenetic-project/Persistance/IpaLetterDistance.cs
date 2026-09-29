@@ -62,6 +62,11 @@ public class IpaCustomLetterDistance
             string rowSymbol = fields[0].Trim();
             if (string.IsNullOrEmpty(rowSymbol)) continue;
 
+            if (new StringInfo(rowSymbol).LengthInTextElements != 1)
+            {
+                throw new Exception("ipa letter distance element lenght must be 1");
+            }
+
             for (int j = 1; j < fields.Length && j < headers.Length; j++)
             {
                 string colSymbol = headers[j].Trim();
@@ -69,6 +74,11 @@ public class IpaCustomLetterDistance
 
                 if (string.IsNullOrEmpty(rawValue))
                     continue;
+                
+                if (new StringInfo(colSymbol).LengthInTextElements != 1)
+                {
+                    throw new Exception("ipa letter distance element lenght must be 1");
+                }
 
                 string normalized = rawValue.Replace(',', '.');
 
