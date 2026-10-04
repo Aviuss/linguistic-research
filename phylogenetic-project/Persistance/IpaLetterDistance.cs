@@ -89,15 +89,22 @@ public class IpaCustomLetterDistance
                         throw new Exception("parsed value should be in range [0; 1] for IPA letter distance");
                     }
 
-                    if (string.CompareOrdinal(rowSymbol, colSymbol) < 0)
+                    var key = string.CompareOrdinal(rowSymbol, colSymbol) < 0
+                        ? (rowSymbol, colSymbol)
+                        : (colSymbol, rowSymbol);
+
+                    if (dict.TryGetValue(key, out decimal existing) && existing != value)
                     {
-                        dict.TryAdd((rowSymbol, colSymbol), value);
-                    }
-                    else
-                    {
-                        dict.TryAdd((colSymbol, rowSymbol), value);
+                        throw new Exception(
+                            $"IPA letter distance matrix is not symmetric: [{rowSymbol}; {colSymbol}] => {value}, but [{colSymbol}; {rowSymbol}] => {existing}");
                     }
 
+                    dict.TryAdd(key, value);
+                }
+                else
+                {
+                    throw new Exception(
+                        $"IPA letter distance value must be a number or empty: [{rowSymbol}; {colSymbol}] => \"{rawValue}\"");
                 }
             }
         }
